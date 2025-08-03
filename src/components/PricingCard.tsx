@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Check } from "lucide-react";
+import { SignupForm } from "@/components/SignupForm";
 
 interface PricingCardProps {
   title: string;
@@ -14,6 +16,11 @@ interface PricingCardProps {
 }
 
 export const PricingCard = ({ title, price, description, features, addOns, isPopular, badge }: PricingCardProps) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleGetStarted = () => {
+    setIsModalOpen(true);
+  };
   return (
     <Card className={`p-8 relative ${isPopular ? 'border-accent border-2 shadow-elegant' : 'shadow-soft'} hover:shadow-elegant transition-all duration-300`}>
       {badge && (
@@ -58,10 +65,18 @@ export const PricingCard = ({ title, price, description, features, addOns, isPop
           variant={isPopular ? "premium" : "outline"} 
           className="w-full"
           size="lg"
+          onClick={handleGetStarted}
         >
           Get Started
         </Button>
       </div>
+
+      {/* Signup Modal */}
+      <SignupForm
+        packageName={title}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </Card>
   );
 };
