@@ -53,7 +53,7 @@ export const Footer = () => {
 
         <div className="border-t border-primary-foreground/20 mt-12 pt-8 text-center">
           <p className="text-primary-foreground/60">
-            © 2024 HeadShot Pro. All rights reserved. Professional headshot photography services in Kuala Lumpur.
+            © {new Date().getFullYear()} Ainan Studio. All rights reserved. Professional headshot photography services in Kuala Lumpur.
           </p>
         </div>
       </div>

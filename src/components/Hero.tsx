@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Camera, MapPin, Clock } from "lucide-react";
-import heroImage from "@/assets/hero-headshot.jpg";
+import heroImage from "@/assets/hero-image.webp";
 
 export const Hero = () => {
   return (
@@ -11,44 +11,46 @@ export const Hero = () => {
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${heroImage})` }}
       >
-        <div className="absolute inset-0 bg-hero-gradient"></div>
+        {/* Enhanced overlay for better text readability */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70"></div>
+        <div className="absolute inset-0 bg-black/30"></div>
       </div>
 
       {/* Content */}
       <div className="relative z-10 max-w-4xl mx-auto px-6 text-center text-white">
-        <Badge variant="secondary" className="mb-6 bg-accent/20 text-accent border-accent/30">
+        <Badge variant="secondary" className="mb-6 bg-white/20 text-white border-white/30 backdrop-blur-sm shadow-lg">
           <MapPin className="w-4 h-4 mr-2" />
           Kuala Lumpur On-Site Service
         </Badge>
 
-        <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+        <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight drop-shadow-2xl">
           Professional On-Site
-          <span className="block text-accent">Headshot Packages</span>
+          <span className="block text-accent drop-shadow-2xl">Headshot Packages</span>
         </h1>
 
-        <p className="text-xl md:text-2xl mb-8 text-white/90 max-w-3xl mx-auto leading-relaxed">
+        <p className="text-xl md:text-2xl mb-8 text-white/95 max-w-3xl mx-auto leading-relaxed drop-shadow-lg backdrop-blur-sm bg-black/20 px-4 py-2 rounded-lg">
           We bring a studio-quality headshot experience to your office — saving your team hours of travel while ensuring everyone looks their best.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-          <Button variant="hero">
+          <Button variant="hero" className="shadow-2xl backdrop-blur-sm">
             <Camera className="w-5 h-5 mr-2" />
             View Packages
           </Button>
-          <Button variant="outline" className="bg-white/10 border-white/30 text-white hover:bg-white/20">
+          <Button variant="outline" className="bg-white/20 border-white/40 text-white hover:bg-white/30 backdrop-blur-sm shadow-lg">
             <Clock className="w-5 h-5 mr-2" />
             Book Consultation
           </Button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-2xl mx-auto">
-          <div className="text-center">
-            <div className="text-3xl font-bold text-accent">48h</div>
-            <div className="text-white/80">Rush Delivery</div>
+          <div className="text-center backdrop-blur-sm bg-black/30 px-6 py-4 rounded-lg shadow-lg">
+            <div className="text-3xl font-bold text-accent drop-shadow-lg">48h</div>
+            <div className="text-white/90 drop-shadow-md">Rush Delivery</div>
           </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-accent">100%</div>
-            <div className="text-white/80">On-Site Service</div>
+          <div className="text-center backdrop-blur-sm bg-black/30 px-6 py-4 rounded-lg shadow-lg">
+            <div className="text-3xl font-bold text-accent drop-shadow-lg">100%</div>
+            <div className="text-white/90 drop-shadow-md">On-Site Service</div>
           </div>
         </div>
       </div>
