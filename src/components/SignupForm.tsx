@@ -2,12 +2,13 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { saveToSupabase, type SignupData } from '@/lib/supabase'
+import { useMutation } from "convex/react";
+import { api } from "../../convex/_generated/api";
 import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
 
 // Form validation schema
@@ -28,6 +29,7 @@ interface SignupFormProps {
 export const SignupForm = ({ packageName, isOpen, onClose }: SignupFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitMessage, setSubmitMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const createSignup = useMutation(api.signups.create)
 
   const {
     register,
@@ -38,20 +40,20 @@ export const SignupForm = ({ packageName, isOpen, onClose }: SignupFormProps) =>
     resolver: zodResolver(signupSchema)
   })
 
+  // No external connection test required with Convex; we rely on provider init
+
   const onSubmit = async (data: SignupFormData) => {
     setIsSubmitting(true)
     setSubmitMessage(null)
 
-    const signupData: SignupData = {
-      name: data.name,
-      email: data.email,
-      phone: data.phone,
-      package_name: packageName
-    }
-
-    const result = await saveToSupabase(signupData)
-
-    if (result.success) {
+    try {
+      await createSignup({
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        packageName,
+        userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
+      })
       setSubmitMessage({ type: 'success', text: 'Thank you! Your information has been submitted successfully.' })
       reset()
       // Close modal after 2 seconds
@@ -59,10 +61,10 @@ export const SignupForm = ({ packageName, isOpen, onClose }: SignupFormProps) =>
         onClose()
         setSubmitMessage(null)
       }, 2000)
-    } else {
+    } catch (err: any) {
       setSubmitMessage({ 
         type: 'error', 
-        text: result.error || 'Something went wrong. Please try again.' 
+        text: err?.message || 'Something went wrong. Please try again.' 
       })
     }
 
@@ -82,6 +84,9 @@ export const SignupForm = ({ packageName, isOpen, onClose }: SignupFormProps) =>
           <DialogTitle className="text-2xl font-bold text-center">
             Get Started with {packageName}
           </DialogTitle>
+          <DialogDescription className="text-center">
+            Fill out the form below and we'll contact you within 24 hours to discuss your requirements and schedule your session.
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 mt-6">

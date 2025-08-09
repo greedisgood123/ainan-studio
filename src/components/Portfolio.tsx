@@ -1,73 +1,36 @@
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { useQuery } from "convex/react";
+import { api } from "../../convex/_generated/api";
 
 
 export const Portfolio = () => {
   const [activeFilter, setActiveFilter] = useState("All");
-
-  const portfolioItems = [
-    {
-      id: 1,
-      title: "Tech Conference 2024",
-      description: "Multi-camera live streaming setup for 500+ attendees",
-      category: "Livefeed",
-    },
-    {
-      id: 2,
-      title: "Elegant Wedding Ceremony",
-      description: "Full day coverage with cinematic highlights",
-      category: "Weddings",
-    },
-    {
-      id: 3,
-      title: "Product Launch Event",
-      description: "Live streaming to multiple platforms simultaneously",
-      category: "Corporate",
-    },
-    {
-      id: 4,
-      title: "Executive Headshots",
-      description: "Professional headshots for C-suite executives",
-      category: "Corporate",
-    },
-    {
-      id: 5,
-      title: "Annual Company Meeting",
-      description: "4K recording and live streaming hybrid event",
-      category: "Corporate",
-    },
-    {
-      id: 6,
-      title: "Garden Wedding Reception",
-      description: "Outdoor ceremony with natural lighting",
-      category: "Weddings",
-    },
-    {
-      id: 7,
-      title: "International Webinar",
-      description: "Global audience streaming with real-time Q&A",
-      category: "Livefeed",
-    },
-    {
-      id: 8,
-      title: "Team Building Event",
-      description: "Full day event documentation and highlights",
-      category: "Corporate",
-    },
-    {
-      id: 9,
-      title: "Fashion Show Stream",
-      description: "Multi-angle live streaming with professional commentary",
-      category: "Livefeed",
-    },
-  ];
-
   const filters = ["All", "Weddings", "Corporate", "Livefeed"];
+  const data = useQuery(api.portfolio.listPublic, { category: activeFilter === "All" ? undefined : activeFilter });
+  const items = useMemo(() => (data ?? []).map((i: any) => ({
+    id: i._id,
+    title: i.title,
+    description: i.description,
+    category: i.category,
+    imageUrl: i.imageUrl as string | undefined,
+  })), [data]);
 
-  const filteredItems = activeFilter === "All" 
-    ? portfolioItems 
-    : portfolioItems.filter(item => item.category === activeFilter);
+  const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
+  const isLightboxOpen = lightboxIdx !== null;
+
+  useEffect(() => {
+    if (!isLightboxOpen) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setLightboxIdx(null);
+      if (e.key === "ArrowRight") setLightboxIdx(idx => (idx === null ? null : (idx + 1) % items.length));
+      if (e.key === "ArrowLeft") setLightboxIdx(idx => (idx === null ? null : (idx - 1 + items.length) % items.length));
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [isLightboxOpen, items.length]);
 
   return (
     <div className="min-h-screen bg-white">
@@ -106,26 +69,30 @@ export const Portfolio = () => {
 
           {/* Portfolio Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredItems.map((item) => (
+            {items.map((item) => (
               <div
                 key={item.id}
                 className="group relative overflow-hidden rounded-lg shadow-soft hover:shadow-elegant transition-all duration-300 bg-white"
               >
-                {/* Image placeholder area */}
-                <div className="relative h-64 bg-gradient-to-br from-gray-200 to-gray-300">
-                  {/* Placeholder icon */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-16 h-16 text-gray-400 opacity-30">
-                      <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
-                      </svg>
-                    </div>
-                  </div>
-                  
-                  {/* Category badge */}
-                  <div className="absolute top-4 left-4">
-                    <div className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium">
-                      {item.category}
+                {/* Image area */}
+                <div className="rounded-t-lg overflow-hidden cursor-pointer" onClick={() => setLightboxIdx(items.findIndex(x => x.id === item.id))}>
+                  <div className="relative">
+                    <AspectRatio ratio={16/9}>
+                      {item.imageUrl ? (
+                        <img src={item.imageUrl} alt={item.title} className="w-full h-full object-contain bg-muted" />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                          <svg viewBox="0 0 24 24" fill="currentColor" className="w-16 h-16 text-gray-400 opacity-30">
+                            <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                          </svg>
+                        </div>
+                      )}
+                    </AspectRatio>
+                    {/* Category badge */}
+                    <div className="absolute top-4 left-4">
+                      <div className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium">
+                        {item.category}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -144,7 +111,7 @@ export const Portfolio = () => {
           </div>
 
           {/* Show message when no items match filter */}
-          {filteredItems.length === 0 && (
+          {items.length === 0 && (
             <div className="text-center py-12">
               <p className="text-gray-500 text-lg">
                 No projects found for the selected category.
@@ -153,6 +120,45 @@ export const Portfolio = () => {
           )}
         </div>
       </section>
+
+      {/* Lightbox */}
+      <Dialog open={isLightboxOpen} onOpenChange={(open) => setLightboxIdx(open ? (lightboxIdx ?? 0) : null)}>
+        <DialogContent className="max-w-5xl">
+          {isLightboxOpen && items[lightboxIdx!] && (
+            <div className="space-y-3">
+              <DialogHeader>
+                <DialogTitle>{items[lightboxIdx!].title}</DialogTitle>
+                <DialogDescription>{items[lightboxIdx!].description}</DialogDescription>
+              </DialogHeader>
+              <div className="w-full max-h-[80vh] flex items-center justify-center bg-black/5 rounded">
+                {items[lightboxIdx!].imageUrl ? (
+                  <img
+                    src={items[lightboxIdx!].imageUrl}
+                    alt={items[lightboxIdx!].title}
+                    className="max-h-[78vh] w-auto object-contain"
+                    onClick={() => setLightboxIdx((lightboxIdx! + 1) % items.length)}
+                  />
+                ) : (
+                  <div className="p-16 text-sm text-muted-foreground">No image available</div>
+                )}
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-muted-foreground">Use ← → or click image to navigate</div>
+                {items[lightboxIdx!].imageUrl && (
+                  <a
+                    className="text-sm underline"
+                    href={items[lightboxIdx!].imageUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Open original
+                  </a>
+                )}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
