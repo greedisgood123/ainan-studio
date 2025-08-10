@@ -1,7 +1,10 @@
 import { PricingCard } from "@/components/PricingCard";
+import { useQuery } from "convex/react";
+import { api } from "../../convex/_generated/api";
 
 export const PricingSection = () => {
-  const packages = [
+  const data = useQuery(api.packages.listPublic, {});
+  const fallback = [
     {
       title: "Solo Headshot Session",
       price: "RM 350",
@@ -18,42 +21,8 @@ export const PricingSection = () => {
         { name: "Rush delivery (48 hours)", price: "RM 150" }
       ]
     },
-    {
-      title: "Team Session",
-      price: "RM 500/hour",
-      description: "Ideal for small to mid-sized teams (4–10 pax).",
-      features: [
-        "Portable studio setup at your office",
-        "~6 minutes per person",
-        "1 final retouched image per person",
-        "Team gallery delivered in 5–7 working days",
-        "Client selects preferred image from previews",
-        "Max 10 pax per hour"
-      ],
-      addOns: [
-        { name: "Multiple looks/team photos", price: "Extra hour booking" }
-      ],
-      isPopular: true,
-      badge: "Most Popular"
-    },
-    {
-      title: "Large Team Session",
-      price: "RM 1,500",
-      description: "Corporate headshots for up to 30 team members.",
-      features: [
-        "Up to 30 team members",
-        "1 retouched image per person",
-        "Full on-site setup",
-        "3-hour shoot with efficient flow",
-        "Group gallery + delivery in 7 working days",
-        "Consistent brand image across your team"
-      ],
-      addOns: [
-        { name: "Additional person (beyond 30)", price: "RM 50/pax" },
-        { name: "Extra hour", price: "RM 300/hour" }
-      ]
-    }
   ];
+  const packages = (data && data.length > 0 ? data : fallback) as any[];
 
   return (
     <section id="packages" className="py-20 px-6 bg-secondary/30">

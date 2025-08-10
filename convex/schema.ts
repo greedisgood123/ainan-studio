@@ -11,6 +11,21 @@ export default defineSchema({
     createdAt: v.number(),
     userAgent: v.optional(v.string()),
   }),
+  bookings: defineTable({
+    name: v.string(),
+    email: v.string(),
+    phone: v.string(),
+    desiredDateMs: v.number(), // start-of-day ms
+    packageName: v.optional(v.string()),
+    userAgent: v.optional(v.string()),
+    status: v.string(), // e.g., "pending", "confirmed", "cancelled"
+    createdAt: v.number(),
+  }).index("by_desiredDate", ["desiredDateMs"]).index("by_createdAt", ["createdAt"]),
+  unavailable_dates: defineTable({
+    dateMs: v.number(), // start-of-day ms
+    reason: v.optional(v.string()),
+    createdAt: v.number(),
+  }).index("by_date", ["dateMs"]),
   admins: defineTable({
     email: v.string(),
     passwordHash: v.string(),
@@ -56,6 +71,19 @@ export default defineSchema({
     createdAt: v.number(),
     updatedAt: v.number(),
   }).index("by_order", ["order"]).index("by_category", ["category","order"]).index("by_published", ["isPublished","order"]),
+  packages: defineTable({
+    title: v.string(),
+    price: v.string(),
+    description: v.string(),
+    features: v.array(v.string()),
+    addOns: v.array(v.object({ name: v.string(), price: v.string() })),
+    isPopular: v.boolean(),
+    badge: v.optional(v.string()),
+    order: v.number(),
+    isPublished: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_order", ["order"]).index("by_published", ["isPublished","order"]),
 });
 
 

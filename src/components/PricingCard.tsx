@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Check } from "lucide-react";
-import { SignupForm } from "@/components/SignupForm";
+import { ButtonBookingForm } from "@/components/ButtonBookingForm";
 
 interface PricingCardProps {
   title: string;
@@ -71,8 +71,8 @@ export const PricingCard = ({ title, price, description, features, addOns, isPop
         </Button>
       </div>
 
-      {/* Signup Modal */}
-      <SignupForm
+      {/* Booking Modal */}
+      <ButtonBookingForm
         packageName={title}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

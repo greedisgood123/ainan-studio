@@ -21,19 +21,19 @@ export const Header = () => {
           </Link>
         </div>
         
-        <nav className="hidden md:flex items-center space-x-8">
-          <Link 
-            to="/Services" 
-            className="text-foreground/80 hover:text-foreground transition-colors duration-200 font-medium relative group"
-          >
-            Services
-            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-200 group-hover:w-full"></span>
-          </Link>
+        <nav className="hidden md:flex items-center space-x-8"> 
           <Link 
             to="/portfolio" 
             className="text-foreground/80 hover:text-foreground transition-colors duration-200 font-medium relative group"
           >
             Portfolio
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-200 group-hover:w-full"></span>
+          </Link>
+          <Link 
+            to="/packages" 
+            className="text-foreground/80 hover:text-foreground transition-colors duration-200 font-medium relative group"
+          >
+            Packages
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-200 group-hover:w-full"></span>
           </Link>
           <Link 

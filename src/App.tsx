@@ -11,7 +11,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { PortfolioPage } from "./pages/portfolio-page";
 import { ContactPage } from "./pages/contact-pages";
-import ServicesPage from "./pages/Services-page";
+import { PackagesPage } from "./pages/packages-page";
 import AdminLogin from "./pages/admin/Login";
 import AdminDashboard from "./pages/admin/Dashboard";
 
@@ -52,9 +52,9 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/portfolio" element={<PortfolioPage />} />
             <Route path="/contact" element={<ContactPage />} />
-            <Route path="/Services" element={<ServicesPage />} />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/packages" element={<PackagesPage />} /> 
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

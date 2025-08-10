@@ -1,9 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Camera, MapPin, Clock } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import heroImage from "@/assets/hero-image.webp";
 
 export const Hero = () => {
+  const navigate = useNavigate();
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background Image */}
@@ -33,13 +35,21 @@ export const Hero = () => {
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-          <Button variant="hero" className="shadow-2xl backdrop-blur-sm">
+          <Button
+            variant="hero"
+            className="shadow-2xl backdrop-blur-sm"
+            onClick={() => navigate('/packages')}
+          >
             <Camera className="w-5 h-5 mr-2" />
             View Packages
           </Button>
-          <Button variant="outline" className="bg-white/20 border-white/40 text-white hover:bg-white/30 backdrop-blur-sm shadow-lg">
+          <Button
+            variant="outline"
+            className="bg-white/20 border-white/40 text-white hover:bg-white/30 backdrop-blur-sm shadow-lg"
+            onClick={() => navigate('/portfolio')}
+          >
             <Clock className="w-5 h-5 mr-2" />
-            Book Consultation
+            See Our Portfolio
           </Button>
         </div>
 
