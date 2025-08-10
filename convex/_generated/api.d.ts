@@ -19,6 +19,7 @@ import type * as bookings from "../bookings.js";
 import type * as clientLogos from "../clientLogos.js";
 import type * as files from "../files.js";
 import type * as gallery from "../gallery.js";
+import type * as llm from "../llm.js";
 import type * as packages from "../packages.js";
 import type * as portfolio from "../portfolio.js";
 import type * as signups from "../signups.js";
@@ -39,6 +40,7 @@ declare const fullApi: ApiFromModules<{
   clientLogos: typeof clientLogos;
   files: typeof files;
   gallery: typeof gallery;
+  llm: typeof llm;
   packages: typeof packages;
   portfolio: typeof portfolio;
   signups: typeof signups;
