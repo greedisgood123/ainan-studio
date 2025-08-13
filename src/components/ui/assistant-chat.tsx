@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAction, useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { MessageCircle, X, Send } from "lucide-react";
@@ -11,9 +11,11 @@ export function AssistantChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showNudge, setShowNudge] = useState(false);
   const chat = useAction(api.llm.chat);
   const createBooking = useMutation(api.bookings.create);
   const unavailableDays = useQuery(api.unavailableDates.publicDays, {});
+  const packages = useQuery(api.packages.listPublic, {});
 
   type Draft = { name: string; email: string; phone: string; date: string; packageName?: string };
   const [draft, setDraft] = useState<Draft | null>(null);
@@ -26,6 +28,17 @@ export function AssistantChat() {
     const start = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
     return (unavailableDays as number[]).includes(start);
   };
+
+  // Gentle nudge to draw attention to the assistant on first visit
+  useEffect(() => {
+    try {
+      const dismissed = localStorage.getItem("assistant_nudge_dismissed");
+      if (!dismissed) {
+        const t = setTimeout(() => setShowNudge(true), 1200);
+        return () => clearTimeout(t);
+      }
+    } catch {}
+  }, []);
 
   const canConfirm = (d: Draft | null): boolean => {
     if (!d) return false;
@@ -70,7 +83,8 @@ export function AssistantChat() {
     try {
       const system =
         "You are a concise booking assistant for a photography and livestream studio in Kuala Lumpur. " +
-        "Gather event type, date, location, headcount, and budget. Recommend a package briefly and stay helpful.\n" +
+        "Gather event type, date, location, headcount, and budget. Recommend a package briefly and stay helpful. " +
+        "Format answers as short bullet points (one line each). Avoid long paragraphs.\n" +
         "When the user confirms they want to book, output one line starting with 'BOOKING:' followed by a strict JSON object with keys name, email, phone, date (YYYY-MM-DD), and packageName. " +
         "Example: BOOKING: {\"name\":\"A\",\"email\":\"a@example.com\",\"phone\":\"0123456789\",\"date\":\"2025-08-12\",\"packageName\":\"Solo Headshot Session\"}. " +
         "Do not include any commentary on that line. Continue your normal response above or below it.";
@@ -112,14 +126,44 @@ export function AssistantChat() {
 
   return (
     <>
-      {/* Floating Button */}
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className="fixed bottom-5 right-5 z-40 rounded-full bg-accent text-white shadow-lg p-4 hover:opacity-90"
-        aria-label={open ? "Close assistant" : "Open assistant"}
-      >
-        {open ? <X className="w-5 h-5" /> : <MessageCircle className="w-5 h-5" />}
-      </button>
+      {/* Floating Button + Nudge */}
+      <div className="fixed bottom-5 right-5 z-40">
+        {!open && showNudge && (
+          <div className="mb-2 mr-1 flex items-center gap-2">
+            <div className="rounded-full bg-blue-600 text-white text-xs px-3 py-1 shadow">
+              Ask me for details
+            </div>
+            <button
+              onClick={() => {
+                setShowNudge(false);
+                try { localStorage.setItem("assistant_nudge_dismissed", "1"); } catch {}
+              }}
+              aria-label="Dismiss assistant hint"
+              className="text-xs text-gray-500 hover:text-gray-700"
+            >
+              ×
+            </button>
+          </div>
+        )}
+        <div className="relative">
+          {!open && (
+            <span className="absolute -inset-1 rounded-full bg-blue-500 opacity-40 animate-ping" />
+          )}
+          <button
+            onClick={() => {
+              setOpen((v) => !v);
+              if (!open) {
+                setShowNudge(false);
+                try { localStorage.setItem("assistant_nudge_dismissed", "1"); } catch {}
+              }
+            }}
+            className={`relative rounded-full p-4 shadow-xl text-white hover:opacity-90 ${open ? "bg-blue-700" : "bg-blue-600"}`}
+            aria-label={open ? "Close assistant" : "Open assistant"}
+          >
+            {open ? <X className="w-5 h-5" /> : <MessageCircle className="w-5 h-5" />}
+          </button>
+        </div>
+      </div>
 
       {/* Panel */}
       {open && (
@@ -136,6 +180,7 @@ export function AssistantChat() {
                       "inline-block rounded-lg px-3 py-2 " +
                       (m.role === "user" ? "bg-accent text-white" : "bg-gray-100 text-gray-900")
                     }
+                    style={{ whiteSpace: "pre-wrap" }}
                   >
                     {m.content}
                   </div>
@@ -144,6 +189,28 @@ export function AssistantChat() {
             )}
             {loading && <div className="text-gray-500">Thinking…</div>}
           </div>
+          {/* Quick package picker */}
+          {packages && !draft && (
+            <div className="border-t p-3 text-xs space-y-2 bg-gray-50">
+              <div className="font-medium text-gray-700">Popular packages</div>
+              <div className="space-y-2">
+                {(packages as any[]).slice(0, 3).map((p) => (
+                  <div key={p._id} className="flex items-center justify-between rounded border bg-white px-2 py-2">
+                    <div className="mr-2 min-w-0">
+                      <div className="truncate font-medium">{p.title}</div>
+                      <div className="text-gray-600">{p.price}</div>
+                    </div>
+                    <button
+                      className="rounded px-2 py-1 text-white bg-accent text-[11px]"
+                      onClick={() => setDraft({ name: "", email: "", phone: "", date: "", packageName: p.title })}
+                    >
+                      Select
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           {draft && (
             <div className="border-t p-3 text-xs space-y-2 bg-gray-50">
               <div className="font-medium text-gray-700">Booking details (confirm or edit):</div>
@@ -172,12 +239,17 @@ export function AssistantChat() {
                   value={draft.date}
                   onChange={(e) => setDraft({ ...(draft as Draft), date: e.target.value })}
                 />
-                <input
+                {/* Package selector */}
+                <select
                   className="col-span-2 rounded border px-2 py-1"
-                  placeholder="Package (optional)"
                   value={draft.packageName || ""}
-                  onChange={(e) => setDraft({ ...(draft as Draft), packageName: e.target.value })}
-                />
+                  onChange={(e) => setDraft({ ...(draft as Draft), packageName: e.target.value || undefined })}
+                >
+                  <option value="">Select a package (optional)</option>
+                  {(packages as any[] | undefined)?.map((p) => (
+                    <option key={p._id} value={p.title}>{p.title} — {p.price}</option>
+                  ))}
+                </select>
               </div>
               {isDateBlocked(draft.date) && (
                 <div className="text-red-600">This date is unavailable. Please choose another date.</div>
@@ -211,6 +283,12 @@ export function AssistantChat() {
               placeholder="Type your message"
               className="flex-1 rounded-md border px-3 py-2 text-sm focus:outline-none"
             />
+            <button
+              onClick={() => setDraft({ name: "", email: "", phone: "", date: "", packageName: undefined })}
+              className="rounded-md border px-3 py-2 text-xs"
+            >
+              Start guided booking
+            </button>
             <button
               onClick={handleSend}
               className="rounded-md bg-accent px-3 py-2 text-white text-sm hover:opacity-90"

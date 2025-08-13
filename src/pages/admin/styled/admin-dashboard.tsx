@@ -88,10 +88,12 @@ export function AdminDashboard({
           <p className="text-sm text-muted-foreground">Manage content</p>
           <h2 className="text-lg sm:text-xl font-semibold">Content Manager</h2>
         </div>
-        <Button variant="outline" onClick={safeLogout} aria-label="Log out">
-          <LogOut className="mr-2 h-4 w-4" />
-          Log out
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={safeLogout} aria-label="Log out">
+            <LogOut className="mr-2 h-4 w-4" />
+            Log out
+          </Button>
+        </div>
       </div>
 
       <Tabs defaultValue="portfolio" className="space-y-4">

@@ -33,9 +33,10 @@ const Dashboard = () => {
   const updateGallery = useMutation(api.gallery.update);
   const removeGallery = useMutation(api.gallery.remove);
   const portfolio = useQuery(api.portfolio.listAdmin, token ? { token } : "skip");
-  const createPortfolio = useMutation(api.portfolio.create);
-  const updatePortfolio = useMutation(api.portfolio.update);
-  const removePortfolio = useMutation(api.portfolio.remove);
+  const createAlbum = useMutation(api.portfolio.createAlbum);
+  const updateAlbum = useMutation(api.portfolio.updateAlbum);
+  const removeAlbum = useMutation(api.portfolio.removeAlbum);
+  const addPhoto = useMutation(api.portfolio.addPhoto);
   const blockDate = useMutation(api.unavailableDates.block);
   const unblockDate = useMutation(api.unavailableDates.unblock);
   const packages = useQuery(api.packages.listAdmin, token ? { token } : "skip");
@@ -81,7 +82,7 @@ const Dashboard = () => {
     title: p.title,
     description: p.description,
     category: p.category,
-    imageUrl: p.imageUrl ?? (p.imageStorageId ? `/_storage/${p.imageStorageId}` : undefined),
+    coverUrl: p.coverUrl ?? (p.coverImageStorageId ? `/_storage/${p.coverImageStorageId}` : undefined),
     order: p.order,
     isPublished: p.isPublished,
   }));
@@ -144,12 +145,12 @@ const Dashboard = () => {
         const json = await res.json();
         storageId = json.storageId;
       }
-      await createPortfolio({
+      await createAlbum({
         token: token!,
         title: payload.title,
         description: payload.description,
         category: payload.category,
-        imageStorageId: storageId as Id<"_storage">,
+        coverImageStorageId: storageId as Id<'_storage'> | undefined,
         order: payload.order ?? 0,
         isPublished: payload.isPublished ?? true,
       });
@@ -160,17 +161,56 @@ const Dashboard = () => {
         const { uploadUrl } = await getUploadUrl({ token: token! });
         const res = await fetch(uploadUrl, { method: 'POST', headers: { 'Content-Type': file.type }, body: file });
         const json = await res.json();
-        await updatePortfolio({ token: token!, id: update.id as Id<"portfolio_items">, imageStorageId: json.storageId as Id<"_storage"> });
+        await updateAlbum({ token: token!, id: update.id as Id<'portfolio_albums'>, coverImageStorageId: json.storageId as Id<'_storage'> });
       }
       const { id, file: _f, ...rest } = update as any;
       if (Object.keys(rest).length > 0) {
-        await updatePortfolio({ token: token!, id: id as Id<"portfolio_items">, ...(rest as any) });
+        await updateAlbum({ token: token!, id: id as Id<'portfolio_albums'>, ...(rest as any) });
       }
     },
     onDelete: async (id: string) => {
-      await removePortfolio({ token: token!, id: id as Id<"portfolio_items"> });
+      await removeAlbum({ token: token!, id: id as Id<'portfolio_albums'> });
     },
     isLoading: portfolio === undefined,
+    uploadToStorage: async (file: File | Blob, onProgress?: (pct: number) => void) => {
+      const { uploadUrl } = await getUploadUrl({ token: token! });
+      return await new Promise<string>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", uploadUrl);
+        xhr.setRequestHeader("Content-Type", (file as Blob).type || "application/octet-stream");
+        if (xhr.upload && onProgress) {
+          xhr.upload.onprogress = (evt) => {
+            if (evt.lengthComputable) {
+              const pct = Math.round((evt.loaded / evt.total) * 100);
+              onProgress(pct);
+            }
+          };
+        }
+        xhr.onerror = () => reject(new Error("Upload failed"));
+        xhr.onload = () => {
+          try {
+            const json = JSON.parse(xhr.responseText);
+            resolve(json.storageId as string);
+          } catch (e) {
+            reject(e);
+          }
+        };
+        xhr.send(file);
+      });
+    },
+    createFromStorage: async (meta: {
+      title: string;
+      description: string;
+      category: string;
+      storageId: string;
+      order?: number;
+      isPublished?: boolean;
+    }) => {
+      // kept for compatibility if needed
+    },
+    addPhotoToAlbum: async (albumId: string, storageId: string, order: number) => {
+      await addPhoto({ token: token!, albumId: albumId as Id<'portfolio_albums'>, imageStorageId: storageId as Id<'_storage'>, order });
+    },
   };
 
   const logoActions = {

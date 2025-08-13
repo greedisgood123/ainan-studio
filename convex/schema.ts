@@ -71,6 +71,25 @@ export default defineSchema({
     createdAt: v.number(),
     updatedAt: v.number(),
   }).index("by_order", ["order"]).index("by_category", ["category","order"]).index("by_published", ["isPublished","order"]),
+  // New album-based portfolio schema
+  portfolio_albums: defineTable({
+    title: v.string(),
+    description: v.string(),
+    category: v.string(), // "Weddings" | "Corporate" | "Livefeed"
+    coverImageStorageId: v.optional(v.id("_storage")),
+    order: v.number(),
+    isPublished: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_order", ["order"]).index("by_category", ["category","order"]).index("by_published", ["isPublished","order"]),
+  portfolio_photos: defineTable({
+    albumId: v.id("portfolio_albums"),
+    imageStorageId: v.id("_storage"),
+    caption: v.optional(v.string()),
+    order: v.number(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_album", ["albumId","order"]),
   packages: defineTable({
     title: v.string(),
     price: v.string(),

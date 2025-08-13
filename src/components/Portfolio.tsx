@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -9,28 +9,42 @@ import { api } from "../../convex/_generated/api";
 export const Portfolio = () => {
   const [activeFilter, setActiveFilter] = useState("All");
   const filters = ["All", "Weddings", "Corporate", "Livefeed"];
-  const data = useQuery(api.portfolio.listPublic, { category: activeFilter === "All" ? undefined : activeFilter });
-  const items = useMemo(() => (data ?? []).map((i: any) => ({
-    id: i._id,
-    title: i.title,
-    description: i.description,
-    category: i.category,
-    imageUrl: i.imageUrl as string | undefined,
-  })), [data]);
+  const albums = useQuery(api.portfolio.listPublic, {
+    category: activeFilter === "All" ? undefined : activeFilter,
+  });
+  const items = useMemo(
+    () =>
+      (albums ?? []).map((i: any) => ({
+        id: i._id,
+        title: i.title,
+        description: i.description,
+        category: i.category,
+        coverUrl: i.coverUrl as string | undefined,
+      })),
+    [albums]
+  );
 
-  const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
-  const isLightboxOpen = lightboxIdx !== null;
+  // Lightbox state
+  const [activeAlbumId, setActiveAlbumId] = useState<string | null>(null);
+  const [lightboxIndex, setLightboxIndex] = useState<number>(0);
+  const photos = useQuery(
+    api.portfolio.listAlbumPhotos as any,
+    activeAlbumId ? ({ albumId: activeAlbumId } as any) : ("skip" as any)
+  ) as any[] | undefined;
+  const isLightboxOpen = activeAlbumId !== null;
 
   useEffect(() => {
-    if (!isLightboxOpen) return;
+    if (!isLightboxOpen || !photos) return;
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setLightboxIdx(null);
-      if (e.key === "ArrowRight") setLightboxIdx(idx => (idx === null ? null : (idx + 1) % items.length));
-      if (e.key === "ArrowLeft") setLightboxIdx(idx => (idx === null ? null : (idx - 1 + items.length) % items.length));
+      if (e.key === "Escape") setActiveAlbumId(null);
+      if (e.key === "ArrowRight")
+        setLightboxIndex((i) => (photos.length ? (i + 1) % photos.length : 0));
+      if (e.key === "ArrowLeft")
+        setLightboxIndex((i) => (photos.length ? (i - 1 + photos.length) % photos.length : 0));
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [isLightboxOpen, items.length]);
+  }, [isLightboxOpen, photos]);
 
   return (
     <div className="min-h-screen bg-white">
@@ -67,7 +81,7 @@ export const Portfolio = () => {
             ))}
           </div>
 
-          {/* Portfolio Grid */}
+          {/* Albums Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {items.map((item) => (
               <div
@@ -75,11 +89,17 @@ export const Portfolio = () => {
                 className="group relative overflow-hidden rounded-lg shadow-soft hover:shadow-elegant transition-all duration-300 bg-white"
               >
                 {/* Image area */}
-                <div className="rounded-t-lg overflow-hidden cursor-pointer" onClick={() => setLightboxIdx(items.findIndex(x => x.id === item.id))}>
+                <div
+                  className="rounded-t-lg overflow-hidden cursor-pointer"
+                  onClick={() => {
+                    setActiveAlbumId(item.id);
+                    setLightboxIndex(0);
+                  }}
+                >
                   <div className="relative">
                     <AspectRatio ratio={16/9}>
-                      {item.imageUrl ? (
-                        <img src={item.imageUrl} alt={item.title} className="w-full h-full object-contain bg-muted" />
+                      {item.coverUrl ? (
+                        <img src={item.coverUrl} alt={item.title} className="w-full h-full object-cover bg-muted" />
                       ) : (
                         <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
                           <svg viewBox="0 0 24 24" fill="currentColor" className="w-16 h-16 text-gray-400 opacity-30">
@@ -121,42 +141,50 @@ export const Portfolio = () => {
         </div>
       </section>
 
-      {/* Lightbox */}
-      <Dialog open={isLightboxOpen} onOpenChange={(open) => setLightboxIdx(open ? (lightboxIdx ?? 0) : null)}>
+      {/* Album Lightbox */}
+      <Dialog open={isLightboxOpen} onOpenChange={(open) => setActiveAlbumId(open ? activeAlbumId : null)}>
         <DialogContent className="max-w-5xl">
-          {isLightboxOpen && items[lightboxIdx!] && (
-            <div className="space-y-3">
-              <DialogHeader>
-                <DialogTitle>{items[lightboxIdx!].title}</DialogTitle>
-                <DialogDescription>{items[lightboxIdx!].description}</DialogDescription>
-              </DialogHeader>
-              <div className="w-full max-h-[80vh] flex items-center justify-center bg-black/5 rounded">
-                {items[lightboxIdx!].imageUrl ? (
-                  <img
-                    src={items[lightboxIdx!].imageUrl}
-                    alt={items[lightboxIdx!].title}
-                    className="max-h-[78vh] w-auto object-contain"
-                    onClick={() => setLightboxIdx((lightboxIdx! + 1) % items.length)}
-                  />
-                ) : (
-                  <div className="p-16 text-sm text-muted-foreground">No image available</div>
-                )}
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="text-sm text-muted-foreground">Use ← → or click image to navigate</div>
-                {items[lightboxIdx!].imageUrl && (
-                  <a
-                    className="text-sm underline"
-                    href={items[lightboxIdx!].imageUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Open original
-                  </a>
-                )}
-              </div>
+          <div className="space-y-3">
+            <DialogHeader>
+              <DialogTitle>
+                {items.find((a) => a.id === activeAlbumId)?.title || "Album"}
+              </DialogTitle>
+              <DialogDescription>
+                {items.find((a) => a.id === activeAlbumId)?.description || ""}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="w-full max-h-[80vh] flex items-center justify-center bg-black/5 rounded">
+              {!photos ? (
+                <div className="p-16 text-sm text-muted-foreground">Loading photos…</div>
+              ) : photos.length === 0 ? (
+                <div className="p-16 text-sm text-muted-foreground">No photos in this album yet.</div>
+              ) : (
+                <img
+                  src={photos[lightboxIndex]?.imageUrl}
+                  alt={items.find((a) => a.id === activeAlbumId)?.title || ""}
+                  className="max-h-[78vh] w-auto object-contain"
+                  onClick={() => setLightboxIndex((i) => (i + 1) % photos.length)}
+                />
+              )}
             </div>
-          )}
+
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-muted-foreground">
+                {photos && photos.length > 0 ? `${lightboxIndex + 1} / ${photos.length} — Use ← → or click image to navigate` : ""}
+              </div>
+              {photos && photos.length > 0 && (
+                <a
+                  className="text-sm underline"
+                  href={photos[lightboxIndex]?.imageUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Open original
+                </a>
+              )}
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
