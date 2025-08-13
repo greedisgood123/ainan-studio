@@ -12,10 +12,10 @@ export const getHero = query({
       .collect()) as any[];
     const row = rows.find((r: any) => r?.key === "hero") ?? null;
     if (!row) return {};
-    // Prefer same-origin paths via Convex's storage route to avoid CORS in dev
-    const mp4Url = row?.mp4StorageId ? `/_storage/${row.mp4StorageId}` : undefined;
-    const webmUrl = row?.webmStorageId ? `/_storage/${row.webmStorageId}` : undefined;
-    const posterUrl = row?.posterStorageId ? `/_storage/${row.posterStorageId}` : undefined;
+    // Return signed absolute URLs so it works on production hosts (e.g., Netlify)
+    const mp4Url = row?.mp4StorageId ? await (ctx.storage as any).getUrl(row.mp4StorageId as any) : undefined;
+    const webmUrl = row?.webmStorageId ? await (ctx.storage as any).getUrl(row.webmStorageId as any) : undefined;
+    const posterUrl = row?.posterStorageId ? await (ctx.storage as any).getUrl(row.posterStorageId as any) : undefined;
     return { mp4Url, webmUrl, posterUrl };
   },
 });
