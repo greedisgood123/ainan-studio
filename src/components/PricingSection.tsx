@@ -1,6 +1,13 @@
 import { PricingCard } from "@/components/PricingCard";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 export const PricingSection = () => {
   const data = useQuery(api.packages.listPublic, {});
@@ -21,6 +28,40 @@ export const PricingSection = () => {
         { name: "Rush delivery (48 hours)", price: "RM 150" }
       ]
     },
+    {
+      title: "Team Headshot Session",
+      price: "RM 1,200",
+      description: "Perfect for small teams needing consistent, professional looks.",
+      features: [
+        "Up to 8 team members",
+        "30–45 min total on-site",
+        "1 background setup",
+        "Web + print resolution delivery",
+        "3–5 working day turnaround",
+      ],
+      addOns: [
+        { name: "Additional member", price: "RM 120/person" },
+        { name: "On-site makeup artist", price: "RM 350" },
+      ],
+      isPopular: true,
+      badge: "Most Popular",
+    },
+    {
+      title: "Executive Branding",
+      price: "RM 2,400",
+      description: "Premium session for C-level and founders to elevate personal brand.",
+      features: [
+        "Up to 2 hours on-site",
+        "Multiple outfit and background changes",
+        "10–12 final retouched images",
+        "Creative direction and posing guidance",
+        "48–72 hour priority delivery",
+      ],
+      addOns: [
+        { name: "Location scouting", price: "RM 300" },
+        { name: "Additional retouched image", price: "RM 40/image" },
+      ],
+    },
   ];
   const packages = (data && data.length > 0 ? data : fallback) as any[];
 
@@ -37,11 +78,20 @@ export const PricingSection = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {packages.map((pkg, index) => (
-            <PricingCard key={index} {...pkg} />
-          ))}
-        </div>
+        <Carousel opts={{ align: "start", loop: false }}>
+          <CarouselContent>
+            {packages.map((pkg, index) => (
+              <CarouselItem
+                key={index}
+                className="basis-full sm:basis-1/2 lg:basis-1/3"
+              >
+                <PricingCard {...pkg} />
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious />
+          <CarouselNext />
+        </Carousel>
       </div>
     </section>
   );

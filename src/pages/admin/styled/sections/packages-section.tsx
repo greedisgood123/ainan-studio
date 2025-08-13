@@ -138,7 +138,9 @@ export function PackagesSection({
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base">{p.title}</CardTitle>
-                  {p.isPopular && <Badge variant="secondary">Popular</Badge>}
+                  {p.isPublished && p.isPopular && (
+                    <Badge variant="secondary">Most Popular</Badge>
+                  )}
                 </div>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -153,7 +155,7 @@ export function PackagesSection({
                 />
                 <div className="flex items-center gap-2">
                   <Switch id={`pop-${p._id}`} checked={p.isPopular} onCheckedChange={checked => onUpdate({ id: p._id, isPopular: checked })} />
-                  <Label htmlFor={`pop-${p._id}`} className="cursor-pointer text-sm">Popular</Label>
+                  <Label htmlFor={`pop-${p._id}`} className="cursor-pointer text-sm">Most Popular</Label>
                 </div>
                 <div className="flex items-center gap-2">
                   <Switch id={`pub-${p._id}`} checked={p.isPublished} onCheckedChange={checked => onUpdate({ id: p._id, isPublished: checked })} />

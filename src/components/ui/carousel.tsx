@@ -237,18 +237,25 @@ const CarouselPrevious = React.forwardRef<
       variant={variant}
       size={size}
       className={cn(
-        "absolute  h-8 w-8 rounded-full", // Fixed size circular button
+        // Larger, polished circular control
+        "absolute h-12 w-12 md:h-14 md:w-14 rounded-full",
+        // Visual treatment
+        "bg-background/80 border border-border shadow-xl backdrop-blur supports-[backdrop-filter]:bg-background/60",
+        // Interaction
+        "transition-transform duration-200 hover:scale-105",
+        // Disabled state resilience
+        "disabled:opacity-50 disabled:cursor-not-allowed",
         // Position based on orientation:
         orientation === "horizontal"
-          ? "-left-12 top-1/2 -translate-y-1/2" // Left side, vertically centered
-          : "-top-12 left-1/2 -translate-x-1/2 rotate-90", // Top, horizontally centered, rotated
+          ? "left-2 md:-left-10 top-1/2 -translate-y-1/2"
+          : "-top-12 left-1/2 -translate-x-1/2 rotate-90",
         className
       )}
       disabled={!canScrollPrev} // Disable when can't scroll further
       onClick={scrollPrev}
       {...props}
     >
-      <ArrowLeft className="h-4 w-4" />
+      <ArrowLeft className="h-6 w-6 md:h-7 md:w-7" />
       <span className="sr-only">Previous slide</span> {/* Screen reader text */}
     </Button>
   )
@@ -268,18 +275,25 @@ const CarouselNext = React.forwardRef<
       variant={variant}
       size={size}
       className={cn(
-        "absolute h-8 w-8 rounded-full", // Fixed size circular button
+        // Larger, polished circular control
+        "absolute h-12 w-12 md:h-14 md:w-14 rounded-full",
+        // Visual treatment
+        "bg-background/80 border border-border shadow-xl backdrop-blur supports-[backdrop-filter]:bg-background/60",
+        // Interaction
+        "transition-transform duration-200 hover:scale-105",
+        // Disabled state resilience
+        "disabled:opacity-50 disabled:cursor-not-allowed",
         // Position based on orientation:
         orientation === "horizontal"
-          ? "-right-12 top-1/2 -translate-y-1/2" // Right side, vertically centered
-          : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90", // Bottom, horizontally centered, rotated
+          ? "right-2 md:-right-10 top-1/2 -translate-y-1/2"
+          : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90",
         className
       )}
       disabled={!canScrollNext} // Disable when can't scroll further
       onClick={scrollNext}
       {...props}
     >
-      <ArrowRight className="h-4 w-4" />
+      <ArrowRight className="h-6 w-6 md:h-7 md:w-7" />
       <span className="sr-only">Next slide</span> {/* Screen reader text */}
     </Button>
   )
