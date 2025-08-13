@@ -43,6 +43,7 @@ const Dashboard = () => {
   const createPackage = useMutation(api.packages.create);
   const updatePackage = useMutation(api.packages.update);
   const removePackage = useMutation(api.packages.remove);
+  const setHeroVideo = useMutation(api.siteSettings.setHeroVideo);
 
   const [newName, setNewName] = useState("");
   const [newOrder, setNewOrder] = useState<number>(0);
@@ -307,6 +308,37 @@ const Dashboard = () => {
     isLoading: packages === undefined,
   };
 
+  const settingsActions = {
+    onSetHero: async (payload: { mp4?: File; webm?: File; poster?: File }) => {
+      const uploads: { mp4StorageId?: string; webmStorageId?: string; posterStorageId?: string } = {};
+      try {
+        if (payload.mp4) {
+          const { uploadUrl } = await getUploadUrl({ token: token! });
+          const res = await fetch(uploadUrl, { method: 'POST', headers: { 'Content-Type': payload.mp4.type }, body: payload.mp4 });
+          const json = await res.json();
+          uploads.mp4StorageId = json.storageId as string;
+        }
+        if (payload.webm) {
+          const { uploadUrl } = await getUploadUrl({ token: token! });
+          const res = await fetch(uploadUrl, { method: 'POST', headers: { 'Content-Type': payload.webm.type }, body: payload.webm });
+          const json = await res.json();
+          uploads.webmStorageId = json.storageId as string;
+        }
+        if (payload.poster) {
+          const { uploadUrl } = await getUploadUrl({ token: token! });
+          const res = await fetch(uploadUrl, { method: 'POST', headers: { 'Content-Type': payload.poster.type }, body: payload.poster });
+          const json = await res.json();
+          uploads.posterStorageId = json.storageId as string;
+        }
+        await setHeroVideo({ token: token!, ...(uploads as any) });
+      } catch (err) {
+        // swallow to avoid crashing the dashboard, surface via console for now
+        console.error('Failed to set hero media:', err);
+        throw err;
+      }
+    },
+  };
+
   return (
     <SidebarProvider defaultOpen>
       <AppSidebar />
@@ -330,6 +362,7 @@ const Dashboard = () => {
             galleryActions={galleryActions}
             bookingsActions={bookingsActions}
             packagesActions={packagesActions}
+            settingsActions={settingsActions}
             onLogout={() => { localStorage.removeItem("admin_token"); window.location.hash = "#/admin/login"; }}
           />
         </div>

@@ -20,6 +20,7 @@ import {
 } from "./sections/gallery-section"
 import { BookingsSection, type BookingItem, type UnavailableDate } from "./sections/bookings-section"
 import { PackagesSection, type PackageItem, type CreatePackagePayload, type UpdatePackagePayload } from "./sections/packages-section"
+import { SettingsSection } from "@/pages/admin/styled/sections/settings-section"
 
 export function AdminDashboard({
   portfolio,
@@ -28,6 +29,7 @@ export function AdminDashboard({
   bookings,
   unavailable,
   packages,
+  settingsActions,
   portfolioActions,
   logoActions,
   galleryActions,
@@ -41,6 +43,10 @@ export function AdminDashboard({
   bookings: BookingItem[]
   unavailable: UnavailableDate[]
   packages: PackageItem[]
+  settingsActions: {
+    onSetHero: (payload: { mp4?: File; webm?: File; poster?: File }) => Promise<void>
+    isLoading?: boolean
+  }
   portfolioActions: {
     onCreate: (payload: CreatePortfolioPayload) => Promise<void>
     onUpdate: (payload: UpdatePortfolioPayload) => Promise<void>
@@ -73,6 +79,9 @@ export function AdminDashboard({
   onLogout?: () => void
 }) {
   const { toast } = useToast()
+  // Defensive guards in case props are passed during HMR/partial renders
+  const onSetHero = settingsActions?.onSetHero ?? (async () => {})
+  const settingsIsLoading = settingsActions?.isLoading ?? false
 
   const safeLogout = useMemo(() => {
     return () => {
@@ -113,6 +122,9 @@ export function AdminDashboard({
           <TabsTrigger value="packages" id="packages">
             Packages
           </TabsTrigger>
+          <TabsTrigger value="settings" id="settings">
+            Settings
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="portfolio">
@@ -139,6 +151,10 @@ export function AdminDashboard({
 
         <TabsContent value="packages">
           <PackagesSection data={packages} {...packagesActions} />
+        </TabsContent>
+
+        <TabsContent value="settings">
+          <SettingsSection onSetHero={onSetHero} isLoading={settingsIsLoading} />
         </TabsContent>
       </Tabs>
 

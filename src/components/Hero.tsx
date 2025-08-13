@@ -4,20 +4,85 @@ import { Camera, MapPin, Clock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { AssistantChat } from "./ui/assistant-chat";
 import heroImage from "@/assets/hero-image.webp";
+import { useQuery } from "convex/react";
+import { api } from "../../convex/_generated/api";
+import React from "react";
 
 export const Hero = () => {
   const navigate = useNavigate();
+  const hero = useQuery(api.siteSettings.getHero, {});
+  const [videoReady, setVideoReady] = React.useState(false);
+  const [videoError, setVideoError] = React.useState<string | null>(null);
+  const [canAttemptVideo, setCanAttemptVideo] = React.useState<boolean>(false);
+
+  // Optional: allow hardcoded public URLs via env to skip upload/storage entirely
+  const overrideMp4 = (import.meta.env.VITE_HERO_MP4_URL as string | undefined) || undefined;
+  const overrideWebm = (import.meta.env.VITE_HERO_WEBM_URL as string | undefined) || undefined;
+  const overridePoster = (import.meta.env.VITE_HERO_POSTER_URL as string | undefined) || undefined;
+  const videoMp4 = overrideMp4 || hero?.mp4Url;
+  const videoWebm = overrideWebm || hero?.webmUrl;
+  const videoPoster = overridePoster || hero?.posterUrl || "/hero-poster.png";
+
+  // If we have video URLs but they never load, fall back after a short timeout
+  React.useEffect(() => {
+    if (!videoMp4 && !videoWebm) return;
+    // Preflight check the URLs so we can fail fast to the image
+    (async () => {
+      try {
+        const candidates = [videoWebm, videoMp4].filter(Boolean) as string[];
+        for (const url of candidates) {
+          try {
+            const res = await fetch(url, { method: 'HEAD', mode: 'cors', credentials: 'omit' });
+            const ct = (res.headers.get('content-type') || '').toLowerCase();
+            const isVideo = ct.startsWith('video/') || url.endsWith('.mp4') || url.endsWith('.webm');
+            if (res.ok && isVideo) {
+              setCanAttemptVideo(true);
+              return;
+            }
+          } catch {}
+        }
+        setVideoError((prev) => prev ?? 'prefetch-failed');
+      } catch {}
+    })();
+    if (videoReady) return;
+    const t = setTimeout(() => {
+      if (!videoReady) setVideoError((prev) => prev ?? "timeout");
+    }, 4000);
+    return () => clearTimeout(t);
+  }, [videoMp4, videoWebm, videoReady]);
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Background Image */}
-      <div 
+      {/* Always render an image fallback. Overlay the video only when ready. */}
+      <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${heroImage})` }}
-      >
-        {/* Enhanced overlay for better text readability */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70"></div>
-        <div className="absolute inset-0 bg-black/30"></div>
-      </div>
+      />
+      {(videoMp4 || videoWebm) && !videoError && canAttemptVideo && (
+        <video
+          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+          poster={videoPoster}
+          crossOrigin="anonymous"
+          onCanPlay={() => setVideoReady(true)}
+          onError={(e) => {
+            console.error("Hero video failed to load", e);
+            setVideoError("load-error");
+          }}
+          style={{ opacity: videoReady ? 1 : 0 }}
+        >
+          {videoWebm && <source src={videoWebm} type="video/webm" />}
+          {videoMp4 && <source src={videoMp4} type="video/mp4" />}
+          Your browser does not support the video tag.
+        </video>
+      )}
+
+      {/* Enhanced overlay for better text readability */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70"></div>
+      <div className="absolute inset-0 bg-black/30"></div>
 
       {/* Content */}
       <div className="relative z-10 max-w-4xl mx-auto px-6 text-center text-white">

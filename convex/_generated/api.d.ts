@@ -23,6 +23,7 @@ import type * as llm from "../llm.js";
 import type * as packages from "../packages.js";
 import type * as portfolio from "../portfolio.js";
 import type * as signups from "../signups.js";
+import type * as siteSettings from "../siteSettings.js";
 import type * as unavailableDates from "../unavailableDates.js";
 
 /**
@@ -44,6 +45,7 @@ declare const fullApi: ApiFromModules<{
   packages: typeof packages;
   portfolio: typeof portfolio;
   signups: typeof signups;
+  siteSettings: typeof siteSettings;
   unavailableDates: typeof unavailableDates;
 }>;
 export declare const api: FilterApi<
