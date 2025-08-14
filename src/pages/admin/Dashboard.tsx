@@ -22,16 +22,12 @@ const Dashboard = () => {
   const token = typeof window !== 'undefined' ? localStorage.getItem("admin_token") : null;
   const me = useQuery(api.auth.me, token ? { token } : "skip");
   const logos = useQuery(api.clientLogos.list, {});
-  const gallery = useQuery(api.gallery.listAdmin, token ? { token } : "skip");
   const bookings = useQuery(api.bookings.listAdmin, token ? { token } : "skip");
   const unavailable = useQuery(api.unavailableDates.list, token ? { token } : "skip");
   const createLogo = useMutation(api.clientLogos.create);
   const updateLogo = useMutation(api.clientLogos.update);
   const removeLogo = useMutation(api.clientLogos.remove);
   const getUploadUrl = useMutation(api.files.getUploadUrl);
-  const createGallery = useMutation(api.gallery.create);
-  const updateGallery = useMutation(api.gallery.update);
-  const removeGallery = useMutation(api.gallery.remove);
   const portfolio = useQuery(api.portfolio.listAdmin, token ? { token } : "skip");
   const createAlbum = useMutation(api.portfolio.createAlbum);
   const updateAlbum = useMutation(api.portfolio.updateAlbum);
@@ -95,16 +91,6 @@ const Dashboard = () => {
     order: l.order,
   }));
 
-  const galleryData: StyledGalleryItem[] = (gallery || []).map((g: any) => ({
-    _id: g._id,
-    title: g.title,
-    description: g.description,
-    badge: g.badge,
-    iconName: g.iconName,
-    imageUrl: g.imageStorageId ? `/_storage/${g.imageStorageId}` : undefined,
-    order: g.order,
-    isPublished: g.isPublished,
-  }));
 
   const bookingsData: StyledBookingItem[] = (bookings || []).map((b: any) => ({
     _id: b._id,
@@ -242,45 +228,6 @@ const Dashboard = () => {
     isLoading: logos === undefined,
   };
 
-  const galleryActions = {
-    onCreate: async (payload: CreateGalleryPayloadStyled) => {
-      const file = payload.file;
-      let storageId: string | undefined = undefined;
-      if (file) {
-        const { uploadUrl } = await getUploadUrl({ token: token! });
-        const res = await fetch(uploadUrl, { method: 'POST', headers: { 'Content-Type': file.type }, body: file });
-        const json = await res.json();
-        storageId = json.storageId;
-      }
-      await createGallery({
-        token: token!,
-        title: payload.title,
-        description: payload.description,
-        badge: payload.badge ?? 'Badge',
-        iconName: payload.iconName ?? 'Play',
-        order: payload.order ?? 0,
-        isPublished: payload.isPublished ?? true,
-        imageStorageId: storageId as Id<"_storage"> | undefined,
-      });
-    },
-    onUpdate: async (update: UpdateGalleryPayloadStyled) => {
-      if ((update as any).file) {
-        const file = (update as any).file as File;
-        const { uploadUrl } = await getUploadUrl({ token: token! });
-        const res = await fetch(uploadUrl, { method: 'POST', headers: { 'Content-Type': file.type }, body: file });
-        const json = await res.json();
-        await updateGallery({ token: token!, id: update.id as Id<"gallery_items">, imageStorageId: json.storageId as Id<"_storage"> });
-      }
-      const { id, file: _f, ...rest } = update as any;
-      if (Object.keys(rest).length > 0) {
-        await updateGallery({ token: token!, id: id as Id<"gallery_items">, ...(rest as any) });
-      }
-    },
-    onDelete: async (id: string) => {
-      await removeGallery({ token: token!, id: id as Id<"gallery_items"> });
-    },
-    isLoading: gallery === undefined,
-  };
 
   const bookingsActions = {
     onBlock: async (dateMs: number, reason?: string) => {
@@ -353,13 +300,11 @@ const Dashboard = () => {
           <AdminDashboard
             portfolio={portfolioData}
             logos={logosData}
-            gallery={galleryData}
             bookings={bookingsData}
             unavailable={unavailableData}
             packages={packagesData}
             portfolioActions={portfolioActions}
             logoActions={logoActions}
-            galleryActions={galleryActions}
             bookingsActions={bookingsActions}
             packagesActions={packagesActions}
             settingsActions={settingsActions}

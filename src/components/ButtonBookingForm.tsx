@@ -44,6 +44,21 @@ export const ButtonBookingForm = ({ packageName, isOpen, onClose }: ButtonBookin
 
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
 
+  const isDateBlocked = (d?: Date) => {
+    if (!d) return false
+    if (!unavailableDays) return false
+    const start = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()
+    return (unavailableDays as number[]).includes(start)
+  }
+
+  const toFriendlyError = (e: any): string => {
+    const m = String(e?.message || '')
+    if (m.toLowerCase().includes('unavailable')) return 'That date is not available. Please choose another date.'
+    if (m.toLowerCase().includes('already booked')) return 'That date has already been booked. Please pick a different date.'
+    if (m.toLowerCase().includes('network') || m.toLowerCase().includes('fetch')) return 'Network issue. Please check your connection and try again.'
+    return 'Sorry, something went wrong. Please try again.'
+  }
+
   const onSubmit = async (data: BookingFormData) => {
     setIsSubmitting(true)
     setSubmitMessage(null)
@@ -51,6 +66,11 @@ export const ButtonBookingForm = ({ packageName, isOpen, onClose }: ButtonBookin
     try {
       const desired = selectedDate ?? data.desiredDate
       if (!desired) throw new Error('Please select a desired date')
+      if (isDateBlocked(desired)) {
+        setSubmitMessage({ type: 'error', text: 'This date is unavailable. Please choose another date.' })
+        setIsSubmitting(false)
+        return
+      }
       const desiredDateMs = new Date(desired.getFullYear(), desired.getMonth(), desired.getDate()).getTime()
       await createBooking({
         name: data.name,
@@ -68,7 +88,7 @@ export const ButtonBookingForm = ({ packageName, isOpen, onClose }: ButtonBookin
         setSubmitMessage(null)
       }, 1500)
     } catch (err: any) {
-      setSubmitMessage({ type: 'error', text: err?.message || 'Something went wrong. Please try another date.' })
+      setSubmitMessage({ type: 'error', text: toFriendlyError(err) })
     }
 
     setIsSubmitting(false)
@@ -83,15 +103,15 @@ export const ButtonBookingForm = ({ packageName, isOpen, onClose }: ButtonBookin
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[480px]">
+      <DialogContent className="w-[min(92vw,640px)] sm:max-w-[640px] p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-center">Book {packageName ? `— ${packageName}` : 'Our Service'}</DialogTitle>
-          <DialogDescription className="text-center">
+          <DialogTitle className="font-bold text-center text-[clamp(1.25rem,2vw+0.5rem,1.75rem)]">Book {packageName ? `— ${packageName}` : 'Our Service'}</DialogTitle>
+          <DialogDescription className="text-center text-[clamp(0.9rem,1vw+0.4rem,1rem)]">
             Tell us your details and preferred date. We’ll confirm availability shortly.
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 mt-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 sm:space-y-6 mt-4 sm:mt-6">
           <div className="space-y-4">
             <div>
               <Label htmlFor="name" className="text-sm font-medium">Full Name *</Label>
@@ -113,23 +133,43 @@ export const ButtonBookingForm = ({ packageName, isOpen, onClose }: ButtonBookin
 
             <div>
               <Label className="text-sm font-medium">Desired Booking Date *</Label>
-              <div className="mt-2 border rounded-md p-3">
+              <div className="mt-2 border rounded-md p-3 sm:p-4">
                 <Calendar
                   mode="single"
                   selected={selectedDate}
-                  onSelect={setSelectedDate}
+                  onSelect={(d) => {
+                    console.log('[Booking] onSelect', d)
+                    // Ignore clicks on blocked days
+                    if (d && !isDateBlocked(d)) {
+                      setSelectedDate(d)
+                      if (submitMessage?.type === 'error') setSubmitMessage(null)
+                    }
+                    if (d && isDateBlocked(d)) {
+                      setSubmitMessage({ type: 'error', text: 'This date is unavailable. Please choose another date.' })
+                    }
+                  }}
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   disabled={(date: any) => {
                     const start = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime()
                     const todayStart = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()).getTime()
                     if (start < todayStart) return true
-                    if (!unavailableDays) return false
-                    return (unavailableDays as number[]).includes(start)
+                    const blocked = (unavailableDays as number[] | undefined)?.includes(start) ?? false
+                    if (blocked) {
+                      // Debug: show which days are blocked
+                      console.debug('[Booking] disabled day (blocked):', new Date(start).toDateString())
+                    }
+                    return blocked
+                  }}
+                  // Visual indicator for blocked dates
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  modifiers={{ unavailable: (date: any) => isDateBlocked(date) }}
+                  modifiersClassNames={{
+                    unavailable: 'bg-destructive/20 text-destructive line-through hover:bg-destructive/20',
                   }}
                   initialFocus
                 />
               </div>
-              {selectedDate && unavailableDays && (unavailableDays as number[]).includes(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()).getTime()) && (
+              {selectedDate && isDateBlocked(selectedDate) && (
                 <p className="text-xs text-red-600 mt-2">This date is unavailable. Please choose another date.</p>
               )}
               {(!selectedDate && errors.desiredDate) && <p className="text-sm text-red-500 mt-1">{errors.desiredDate.message}</p>}
@@ -149,9 +189,11 @@ export const ButtonBookingForm = ({ packageName, isOpen, onClose }: ButtonBookin
             </Alert>
           )}
 
-          <Button type="submit" className="w-full" size="lg" disabled={isSubmitting || (!!selectedDate && !!unavailableDays && (unavailableDays as number[]).includes(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()).getTime()))}>
-            {isSubmitting ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />Submitting...</>) : 'Submit Booking'}
-          </Button>
+          <div className="sticky bottom-0 bg-background/90 backdrop-blur border-t pt-3">
+            <Button type="submit" className="w-full text-[clamp(0.95rem,1vw+0.5rem,1.1rem)] py-2" size="lg" disabled={isSubmitting || isDateBlocked(selectedDate)}>
+              {isSubmitting ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />Submitting...</>) : 'Submit Booking'}
+            </Button>
+          </div>
         </form>
       </DialogContent>
     </Dialog>
