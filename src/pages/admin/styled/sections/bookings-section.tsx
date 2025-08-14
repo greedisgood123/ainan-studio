@@ -97,9 +97,14 @@ export function BookingsSection({
               <div className="flex gap-2">
                 <Button
                   onClick={async () => {
-                    if (!selected) return
-                    await onUnavailBlock(new Date(selected.getFullYear(), selected.getMonth(), selected.getDate()).getTime(), reason || undefined)
-                    setReason("")
+                    try {
+                      if (!selected) return
+                      await onUnavailBlock(new Date(selected.getFullYear(), selected.getMonth(), selected.getDate()).getTime(), reason || undefined)
+                      setReason("")
+                    } catch (e) {
+                      // No toast hook in this component; keep it silent to avoid UI jumps
+                      console.error('Failed to block date', e)
+                    }
                   }}
                 >
                   Block Date
@@ -107,8 +112,12 @@ export function BookingsSection({
                 <Button
                   variant="outline"
                   onClick={async () => {
-                    if (!selected) return
-                    await onUnavailUnblock(new Date(selected.getFullYear(), selected.getMonth(), selected.getDate()).getTime())
+                    try {
+                      if (!selected) return
+                      await onUnavailUnblock(new Date(selected.getFullYear(), selected.getMonth(), selected.getDate()).getTime())
+                    } catch (e) {
+                      console.error('Failed to unblock date', e)
+                    }
                   }}
                 >
                   Unblock

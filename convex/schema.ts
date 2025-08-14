@@ -103,6 +103,14 @@ export default defineSchema({
     createdAt: v.number(),
     updatedAt: v.number(),
   }).index("by_order", ["order"]).index("by_published", ["isPublished","order"]),
+  // Site-wide settings (single-row per key). Used for hero video/media configuration.
+  site_settings: defineTable({
+    key: v.string(), // e.g. "hero"
+    mp4StorageId: v.optional(v.id("_storage")),
+    webmStorageId: v.optional(v.id("_storage")),
+    posterStorageId: v.optional(v.id("_storage")),
+    updatedAt: v.number(),
+  }).index("by_key", ["key"]),
 });
 
 

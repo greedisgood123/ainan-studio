@@ -87,14 +87,18 @@ export function LogosSection({
           <div className="flex items-center gap-3">
             <Button
               onClick={async () => {
-                if (!name || !file) {
-                  toast({ title: "Please add a name and logo file" })
-                  return
+                try {
+                  if (!name || !file) {
+                    toast({ title: "Please add a name and logo file" })
+                    return
+                  }
+                  await onCreate({ name, order, file, previewUrl })
+                  setName("")
+                  setOrder(0)
+                  setFile(undefined)
+                } catch (e: any) {
+                  toast({ title: e?.message || "Failed to create logo" })
                 }
-                await onCreate({ name, order, file, previewUrl })
-                setName("")
-                setOrder(0)
-                setFile(undefined)
               }}
             >
               Create
@@ -150,12 +154,12 @@ export function LogosSection({
                   />
                 </div>
                 <div className="flex items-center gap-2">
-                  <Input defaultValue={l.name} onBlur={(e) => onUpdate({ id: l._id, name: e.target.value })} />
+                  <Input defaultValue={l.name} onBlur={async (e) => { try { await onUpdate({ id: l._id, name: e.target.value }) } catch (e: any) { toast({ title: e?.message || "Update failed" }) } }} />
                   <Input
                     type="number"
                     className="w-24"
                     defaultValue={l.order}
-                    onBlur={(e) => onUpdate({ id: l._id, order: Number(e.target.value) })}
+                    onBlur={async (e) => { try { await onUpdate({ id: l._id, order: Number(e.target.value) }) } catch (e: any) { toast({ title: e?.message || "Update failed" }) } }}
                   />
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
@@ -171,7 +175,7 @@ export function LogosSection({
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => onDelete(l._id)}>Delete</AlertDialogAction>
+                        <AlertDialogAction onClick={async () => { try { await onDelete(l._id) } catch (e: any) { toast({ title: e?.message || "Delete failed" }) } }}>Delete</AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>

@@ -115,18 +115,22 @@ export function GallerySection({
             </div>
             <Button
               onClick={async () => {
-                if (!title) {
-                  toast({ title: "Please add a title" })
-                  return
+                try {
+                  if (!title) {
+                    toast({ title: "Please add a title" })
+                    return
+                  }
+                  await onCreate({ title, description: desc, badge, iconName, order, isPublished, file, previewUrl })
+                  setTitle("")
+                  setDesc("")
+                  setOrder(0)
+                  setBadge("Badge")
+                  setIconName("Play")
+                  setIsPublished(true)
+                  setFile(undefined)
+                } catch (e: any) {
+                  toast({ title: e?.message || "Failed to create item" })
                 }
-                await onCreate({ title, description: desc, badge, iconName, order, isPublished, file, previewUrl })
-                setTitle("")
-                setDesc("")
-                setOrder(0)
-                setBadge("Badge")
-                setIconName("Play")
-                setIsPublished(true)
-                setFile(undefined)
               }}
             >
               Create
@@ -183,10 +187,10 @@ export function GallerySection({
                     />
                   </div>
                 )}
-                <Input defaultValue={item.title} onBlur={(e) => onUpdate({ id: item._id, title: e.target.value })} />
+                <Input defaultValue={item.title} onBlur={async (e) => { try { await onUpdate({ id: item._id, title: e.target.value }) } catch (e: any) { toast({ title: e?.message || "Update failed" }) } }} />
                 <Input
                   defaultValue={item.description}
-                  onBlur={(e) => onUpdate({ id: item._id, description: e.target.value })}
+                  onBlur={async (e) => { try { await onUpdate({ id: item._id, description: e.target.value }) } catch (e: any) { toast({ title: e?.message || "Update failed" }) } }}
                 />
                 <div className="flex items-center gap-2">
                   <Input
@@ -195,22 +199,22 @@ export function GallerySection({
                     onChange={async (e) => {
                       const f = e.target.files?.[0]
                       if (!f) return
-                      await onUpdate({ id: item._id, file: f })
+                      try { await onUpdate({ id: item._id, file: f }) } catch (e: any) { toast({ title: e?.message || "Upload failed" }) }
                     }}
                   />
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
-                  <Input
+                    <Input
                     className="w-28"
                     type="number"
                     defaultValue={item.order}
-                    onBlur={(e) => onUpdate({ id: item._id, order: Number(e.target.value) })}
+                      onBlur={async (e) => { try { await onUpdate({ id: item._id, order: Number(e.target.value) }) } catch (e: any) { toast({ title: e?.message || "Update failed" }) } }}
                   />
                   <div className="flex items-center gap-2">
                     <Switch
                       id={`gpub-${item._id}`}
                       checked={item.isPublished}
-                      onCheckedChange={(checked) => onUpdate({ id: item._id, isPublished: checked })}
+                        onCheckedChange={async (checked) => { try { await onUpdate({ id: item._id, isPublished: checked }) } catch (e: any) { toast({ title: e?.message || "Update failed" }) } }}
                     />
                     <Label htmlFor={`gpub-${item._id}`} className="cursor-pointer text-sm">
                       Published
@@ -230,7 +234,7 @@ export function GallerySection({
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => onDelete(item._id)}>Delete</AlertDialogAction>
+                        <AlertDialogAction onClick={async () => { try { await onDelete(item._id) } catch (e: any) { toast({ title: e?.message || "Delete failed" }) } }}>Delete</AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>

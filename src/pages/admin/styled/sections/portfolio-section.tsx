@@ -344,16 +344,21 @@ export function PortfolioSection({
             </div>
             <Button
               onClick={async () => {
-                if (!title || !file) {
-                  toast({ title: "Please add a title and image" })
-                  return
+                try {
+                  if (!title || !file) {
+                    toast({ title: "Please add a title and image" })
+                    return
+                  }
+                  await onCreate({ title, description: desc, category, order, isPublished, file, previewUrl })
+                  setTitle("")
+                  setDesc("")
+                  setOrder(0)
+                  setIsPublished(true)
+                  setFile(undefined)
+                } catch (e: any) {
+                  const msg = e?.message || "Failed to create album"
+                  toast({ title: msg })
                 }
-                await onCreate({ title, description: desc, category, order, isPublished, file, previewUrl })
-                setTitle("")
-                setDesc("")
-                setOrder(0)
-                setIsPublished(true)
-                setFile(undefined)
               }}
             >
               Create
@@ -416,13 +421,13 @@ export function PortfolioSection({
                   </AspectRatio>
                 </div>
 
-                <Input defaultValue={p.title} onBlur={(e) => onUpdate({ id: p._id, title: e.target.value })} />
+                <Input defaultValue={p.title} onBlur={async (e) => { try { await onUpdate({ id: p._id, title: e.target.value }) } catch (e: any) { toast({ title: e?.message || "Update failed" }) } }} />
                 <Input
                   defaultValue={p.description}
-                  onBlur={(e) => onUpdate({ id: p._id, description: e.target.value })}
+                  onBlur={async (e) => { try { await onUpdate({ id: p._id, description: e.target.value }) } catch (e: any) { toast({ title: e?.message || "Update failed" }) } }}
                 />
 
-                <Select defaultValue={p.category} onValueChange={(val) => onUpdate({ id: p._id, category: val })}>
+                <Select defaultValue={p.category} onValueChange={async (val) => { try { await onUpdate({ id: p._id, category: val }) } catch (e: any) { toast({ title: e?.message || "Update failed" }) } }}>
                   <SelectTrigger>
                     <SelectValue placeholder="Category" />
                   </SelectTrigger>
@@ -440,13 +445,13 @@ export function PortfolioSection({
                     className="w-28"
                     type="number"
                     defaultValue={p.order}
-                    onBlur={(e) => onUpdate({ id: p._id, order: Number(e.target.value) })}
+                    onBlur={async (e) => { try { await onUpdate({ id: p._id, order: Number(e.target.value) }) } catch (e: any) { toast({ title: e?.message || "Update failed" }) } }}
                   />
                   <div className="flex items-center gap-2">
                     <Switch
                       id={`pub-${p._id}`}
                       checked={p.isPublished}
-                      onCheckedChange={(checked) => onUpdate({ id: p._id, isPublished: checked })}
+                      onCheckedChange={async (checked) => { try { await onUpdate({ id: p._id, isPublished: checked }) } catch (e: any) { toast({ title: e?.message || "Update failed" }) } }}
                     />
                     <Label htmlFor={`pub-${p._id}`} className="cursor-pointer text-sm">
                       Published
@@ -467,7 +472,7 @@ export function PortfolioSection({
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => onDelete(p._id)}>Delete</AlertDialogAction>
+                        <AlertDialogAction onClick={async () => { try { await onDelete(p._id) } catch (e: any) { toast({ title: e?.message || "Delete failed" }) } }}>Delete</AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
