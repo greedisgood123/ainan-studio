@@ -5,9 +5,21 @@ import { MessageCircle, X, Send } from "lucide-react";
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
 
-export function AssistantChat() {
+type AssistantChatProps = {
+  floating?: boolean;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+};
+
+export function AssistantChat({ floating = true, open: externalOpen, onOpenChange }: AssistantChatProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [open, setOpen] = useState(false);
+  const isControlled = typeof externalOpen === "boolean";
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = isControlled ? (externalOpen as boolean) : internalOpen;
+  const setOpen = (v: boolean) => {
+    if (isControlled) onOpenChange?.(v);
+    else setInternalOpen(v);
+  };
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -29,8 +41,9 @@ export function AssistantChat() {
     return (unavailableDays as number[]).includes(start);
   };
 
-  // Gentle nudge to draw attention to the assistant on first visit
+  // Gentle nudge to draw attention to the assistant on first visit (floating mode only)
   useEffect(() => {
+    if (!floating) return;
     try {
       const dismissed = localStorage.getItem("assistant_nudge_dismissed");
       if (!dismissed) {
@@ -38,7 +51,7 @@ export function AssistantChat() {
         return () => clearTimeout(t);
       }
     } catch {}
-  }, []);
+  }, [floating]);
 
   const canConfirm = (d: Draft | null): boolean => {
     if (!d) return false;
@@ -126,48 +139,50 @@ export function AssistantChat() {
 
   return (
     <>
-      {/* Floating Button + Nudge */}
-      <div className="fixed bottom-5 right-5 z-40">
-        {!open && showNudge && (
-          <div className="mb-2 mr-1 flex items-center gap-2">
-            <div className="rounded-full bg-blue-600 text-white text-xs px-3 py-1 shadow">
-              Ask me for details
+      {/* Floating Button + Nudge (floating mode only) */}
+      {floating && (
+        <div className="fixed bottom-5 right-5 z-40">
+          {!open && showNudge && (
+            <div className="mb-2 mr-1 flex items-center gap-2">
+              <div className="rounded-full bg-blue-600 text-white text-xs px-3 py-1 shadow">
+                Ask me for details
+              </div>
+              <button
+                onClick={() => {
+                  setShowNudge(false);
+                  try { localStorage.setItem("assistant_nudge_dismissed", "1"); } catch {}
+                }}
+                aria-label="Dismiss assistant hint"
+                className="text-xs text-gray-500 hover:text-gray-700"
+              >
+                ×
+              </button>
             </div>
+          )}
+          <div className="relative">
+            {!open && (
+              <span className="absolute -inset-1 rounded-full bg-blue-500 opacity-40 animate-ping" />
+            )}
             <button
               onClick={() => {
-                setShowNudge(false);
-                try { localStorage.setItem("assistant_nudge_dismissed", "1"); } catch {}
+                setOpen(!open);
+                if (!open) {
+                  setShowNudge(false);
+                  try { localStorage.setItem("assistant_nudge_dismissed", "1"); } catch {}
+                }
               }}
-              aria-label="Dismiss assistant hint"
-              className="text-xs text-gray-500 hover:text-gray-700"
+              className={`relative rounded-full p-4 shadow-xl text-white hover:opacity-90 ${open ? "bg-blue-700" : "bg-blue-600"}`}
+              aria-label={open ? "Close assistant" : "Open assistant"}
             >
-              ×
+              {open ? <X className="w-5 h-5" /> : <MessageCircle className="w-5 h-5" />}
             </button>
           </div>
-        )}
-        <div className="relative">
-          {!open && (
-            <span className="absolute -inset-1 rounded-full bg-blue-500 opacity-40 animate-ping" />
-          )}
-          <button
-            onClick={() => {
-              setOpen((v) => !v);
-              if (!open) {
-                setShowNudge(false);
-                try { localStorage.setItem("assistant_nudge_dismissed", "1"); } catch {}
-              }
-            }}
-            className={`relative rounded-full p-4 shadow-xl text-white hover:opacity-90 ${open ? "bg-blue-700" : "bg-blue-600"}`}
-            aria-label={open ? "Close assistant" : "Open assistant"}
-          >
-            {open ? <X className="w-5 h-5" /> : <MessageCircle className="w-5 h-5" />}
-          </button>
         </div>
-      </div>
+      )}
 
       {/* Panel */}
       {open && (
-        <div className="fixed bottom-20 right-5 z-40 w-[360px] max-w-[90vw] rounded-lg border bg-white shadow-2xl">
+        <div className={`${floating ? "fixed bottom-20 right-5" : "fixed left-3 right-3 bottom-[96px]"} z-50 w-[360px] max-w-[90vw] rounded-lg border bg-white shadow-2xl`}>
           <div className="border-b p-3 text-sm font-medium">Booking Assistant</div>
           <div ref={containerRef} className="max-h-80 overflow-y-auto p-3 space-y-2 text-sm">
             {messages.length === 0 ? (
