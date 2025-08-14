@@ -21,7 +21,8 @@ export const Hero = () => {
   const overridePoster = (import.meta.env.VITE_HERO_POSTER_URL as string | undefined) || undefined;
   const videoMp4 = overrideMp4 || hero?.mp4Url;
   const videoWebm = overrideWebm || hero?.webmUrl;
-  const videoPoster = overridePoster || hero?.posterUrl || "/hero-poster.png";
+  // Use bundled hero image as final fallback to avoid 404s in production
+  const videoPoster = overridePoster || hero?.posterUrl || (heroImage as string);
 
   // If we have video URLs but they never load, fall back after a short timeout
   React.useEffect(() => {
