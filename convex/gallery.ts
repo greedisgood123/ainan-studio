@@ -11,8 +11,8 @@ export const listPublic = query({
       .withIndex("by_published", q => q.eq("isPublished", true))
       .order("asc")
       .collect();
-    // Pick a representative subset (first 3 for now) and map to gallery view
-    const subset = portfolio.slice(0, 3);
+    // Return a reasonable number for the public gallery grid
+    const subset = portfolio.slice(0, 9);
     const mapped = await Promise.all(subset.map(async (p) => ({
       title: p.title,
       description: p.description,
