@@ -85,10 +85,11 @@ const CreativeGalleryTile = ({
             {!loaded && <div className="absolute inset-0 bg-muted animate-pulse" />}
             <img
               src={work.imageUrl}
+              srcSet={`${work.imageUrl} 800w`}
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               alt={work.title}
               loading="lazy"
               decoding="async"
-              sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
               className="absolute inset-0 w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:rotate-1 will-change-transform"
               onLoad={() => setLoaded(true)}
               onError={(e) => {

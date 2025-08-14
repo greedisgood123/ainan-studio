@@ -14,6 +14,7 @@ import { ContactPage } from "./pages/contact-pages";
 import { PackagesPage } from "./pages/packages-page";
 import AdminLogin from "./pages/admin/Login";
 import AdminDashboard from "./pages/admin/Dashboard";
+import MobileTabBar from "@/components/ui/mobile-tabbar";
 
 const queryClient = new QueryClient();
 
@@ -58,6 +59,7 @@ const App = () => (
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <MobileTabBar />
         </HashRouter>
       </TooltipProvider>
     </QueryClientProvider>

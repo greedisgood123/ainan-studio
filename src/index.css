@@ -123,3 +123,10 @@ All colors MUST be HSL.
   }
   html { -webkit-tap-highlight-color: transparent; }
 }
+
+/* Prevent content underlap with mobile tab bar */
+@layer utilities {
+  .pb-tabbar-safe {
+    padding-bottom: calc(68px + env(safe-area-inset-bottom));
+  }
+}

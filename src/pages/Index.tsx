@@ -8,7 +8,7 @@ import { Trusted } from "@/components/Trusted";
 
 const Index = () => {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen pb-tabbar-safe">
       <Header />
       <Hero />
       <Gallery />

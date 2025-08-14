@@ -32,11 +32,11 @@ export const Trusted = () => {
   }));
 
   return (
-    <section className="py-16 px-6 bg-white border-b border-blue-200">
+    <section className="py-12 md:py-16 px-4 md:px-6 bg-white border-b border-blue-200">
       <div className="max-w-7xl mx-auto">
         {/* Section Title */}
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
             Trusted by Industry Leaders
           </h2>
         </div>
@@ -54,11 +54,13 @@ export const Trusted = () => {
             {logoItems.map((logo) => (
               <div
                 key={logo.id}
-                className="flex-shrink-0 w-32 h-32 bg-white rounded-lg flex items-center justify-center border border-gray-200"
-                style={{ minWidth: '128px' }}
+                className="flex-shrink-0 w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 bg-white rounded-lg flex items-center justify-center border border-gray-200"
+                style={{ minWidth: '96px' }}
               >
                 <img
                   src={logo.src}
+                  srcSet={`${logo.src} 400w`}
+                  sizes="(max-width: 640px) 25vw, 128px"
                   alt={logo.name}
                   className="max-w-full max-h-full object-contain"
                 />

@@ -99,7 +99,15 @@ export const Portfolio = () => {
                   <div className="relative">
                     <AspectRatio ratio={16/9}>
                       {item.coverUrl ? (
-                        <img src={item.coverUrl} alt={item.title} className="w-full h-full object-cover bg-muted" />
+                        <img 
+                          src={item.coverUrl} 
+                          srcSet={`${item.coverUrl} 1000w`} 
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" 
+                          alt={item.title} 
+                          className="w-full h-full object-cover bg-muted" 
+                          loading="lazy" 
+                          decoding="async"
+                        />
                       ) : (
                         <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
                           <svg viewBox="0 0 24 24" fill="currentColor" className="w-16 h-16 text-gray-400 opacity-30">
@@ -162,6 +170,8 @@ export const Portfolio = () => {
               ) : (
                 <img
                   src={photos[lightboxIndex]?.imageUrl}
+                  srcSet={`${photos[lightboxIndex]?.imageUrl} 1600w`}
+                  sizes="100vw"
                   alt={items.find((a) => a.id === activeAlbumId)?.title || ""}
                   className="max-h-[78vh] w-auto object-contain"
                   onClick={() => setLightboxIndex((i) => (i + 1) % photos.length)}

@@ -49,23 +49,23 @@ export const Testimonials = () => {
   };
 
   return (
-    <section className="py-20 px-6 bg-muted/30">
+    <section className="py-16 md:py-20 px-4 md:px-6 bg-muted/30">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-6">
             What Our Clients Say
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
             Don't just take our word for it — hear from the clients who've experienced our professional services
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
           {testimonials.map((testimonial, index) => (
-            <Card key={index} className="p-6 shadow-soft hover:shadow-elegant transition-all duration-300">
+            <Card key={index} className="p-5 md:p-6 shadow-soft hover:shadow-elegant transition-all duration-300">
               {/* Quote Icon */}
               <div className="mb-4">
-                <Quote className="w-8 h-8 text-blue-600 opacity-60" />
+                <Quote className="w-6 h-6 md:w-8 md:h-8 text-blue-600 opacity-60" />
               </div>
 
               {/* Rating Stars */}
@@ -74,20 +74,20 @@ export const Testimonials = () => {
               </div>
 
               {/* Testimonial Content */}
-              <p className="text-muted-foreground leading-relaxed mb-6">
+              <p className="text-sm md:text-base text-muted-foreground leading-relaxed mb-6">
                 "{testimonial.content}"
               </p>
 
               {/* Client Info */}
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                <div className="w-9 h-9 md:w-10 md:h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
                   {testimonial.image}
                 </div>
                 <div>
-                  <h4 className="font-semibold text-foreground">
+                  <h4 className="font-semibold text-foreground text-sm md:text-base">
                     {testimonial.name}
                   </h4>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs md:text-sm text-muted-foreground">
                     {testimonial.role}, {testimonial.company}
                   </p>
                 </div>
