@@ -8,6 +8,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import Autoplay from "embla-carousel-autoplay";
 
 export const PricingSection = () => {
   const data = useQuery(api.packages.listPublic, {});
@@ -66,7 +67,7 @@ export const PricingSection = () => {
   const packages = (data && data.length > 0 ? data : fallback) as any[];
 
   return (
-    <section id="packages" className="py-20 px-6 bg-secondary/30">
+    <section id="packages" className="py-20 px-6 bg-secondary/30 bg-[radial-gradient(1000px_circle_at_50%_-20%,hsl(var(--accent)/0.15),transparent_60%)]">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
@@ -78,14 +79,22 @@ export const PricingSection = () => {
           </p>
         </div>
 
-        <Carousel opts={{ align: "start", loop: false }}>
-          <CarouselContent>
+        <Carousel
+          opts={{ align: "start", loop: true }}
+          plugins={[Autoplay({ delay: 4500 }) as unknown as any]}
+        >
+          <CarouselContent className="items-stretch">
             {packages.map((pkg, index) => (
               <CarouselItem
                 key={index}
                 className="basis-full sm:basis-1/2 lg:basis-1/3"
               >
-                <PricingCard {...pkg} />
+                <div
+                  className="h-full animate-in fade-in-50 slide-in-from-bottom-4 [animation-fill-mode:backwards]"
+                  style={{ animationDelay: `${index * 120}ms` }}
+                >
+                  <PricingCard {...pkg} />
+                </div>
               </CarouselItem>
             ))}
           </CarouselContent>
