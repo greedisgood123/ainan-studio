@@ -138,20 +138,20 @@ const CreativeGalleryTile = ({
             <p className="text-white/80 text-sm leading-relaxed mb-4 opacity-0 group-hover:opacity-100 transition-all duration-300">
               {work.description}
             </p>
-            <button
-              type="button"
-              className="inline-flex items-center gap-2 text-white/90 text-sm font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 hover:text-white"
-              onClick={onOpen}
-            >
-              <span>View More</span>
-              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-            </button>
+          <button
+            type="button"
+            className="inline-flex items-center gap-2 text-white/90 text-sm font-medium opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all duration-300 hover:text-white"
+            onClick={onOpen}
+          >
+            <span>View More</span>
+            <ArrowRight className="w-4 h-4 transition-transform md:group-hover:translate-x-1" />
+          </button>
           </div>
         </div>
 
         {/* Decorative corners */}
-        <div className="absolute top-0 left-0 w-16 h-16 border-l-2 border-t-2 border-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-        <div className="absolute bottom-0 right-0 w-16 h-16 border-r-2 border-b-2 border-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        <div className="absolute top-0 left-0 w-12 h-12 sm:w-16 sm:h-16 border-l-2 border-t-2 border-white/20 opacity-30 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-500" />
+        <div className="absolute bottom-0 right-0 w-12 h-12 sm:w-16 sm:h-16 border-r-2 border-b-2 border-white/20 opacity-30 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-500" />
       </div>
     </div>
   );

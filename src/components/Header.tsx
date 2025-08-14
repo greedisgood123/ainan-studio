@@ -1,5 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { Menu } from "lucide-react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 export const Header = () => {
   return (
@@ -45,9 +47,32 @@ export const Header = () => {
           </Link>
         </nav>
 
-        <Button variant="premium" className="shadow-lg hover:shadow-xl transition-all duration-200">
-          Book Now
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="premium" className="shadow-lg hover:shadow-xl transition-all duration-200 hidden md:inline-flex">
+            Book Now
+          </Button>
+          {/* Mobile menu */}
+          <div className="md:hidden">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" aria-label="Open menu">
+                  <Menu className="w-5 h-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[85vw] sm:w-[360px]">
+                <SheetHeader>
+                  <SheetTitle className="text-left">Menu</SheetTitle>
+                </SheetHeader>
+                <div className="mt-6 flex flex-col gap-3">
+                  <Link to="/portfolio" className="text-base py-2">Portfolio</Link>
+                  <Link to="/packages" className="text-base py-2">Packages</Link>
+                  <Link to="/contact" className="text-base py-2">Contact</Link>
+                  <Button variant="premium" className="mt-4">Book Now</Button>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
+        </div>
       </div>
     </header>
   );
