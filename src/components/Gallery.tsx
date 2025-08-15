@@ -82,17 +82,27 @@ const CreativeGalleryTile = ({
       <div className="relative overflow-hidden" style={{ aspectRatio: `${getAspectRatio()}` }}>
         {work.imageUrl ? (
           <button type="button" className="absolute inset-0 group" onClick={onOpen} aria-label={`Open ${work.title}`}>
-            {!loaded && <div className="absolute inset-0 bg-muted animate-pulse" />}
+            {!loaded && (
+              <div className="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300 animate-pulse flex items-center justify-center">
+                <div className="w-8 h-8 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            )}
             <img
               src={work.imageUrl}
-              srcSet={`${work.imageUrl} 800w`}
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              srcSet={`${work.imageUrl}?w=640 640w, ${work.imageUrl}?w=768 768w, ${work.imageUrl}?w=1024 1024w`}
+              sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 400px"
               alt={work.title}
               loading="lazy"
               decoding="async"
               className="absolute inset-0 w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:rotate-1 will-change-transform"
+              style={{ 
+                opacity: loaded ? 1 : 0,
+                transform: loaded ? 'scale(1)' : 'scale(1.1)',
+                transition: 'all 0.3s ease-in-out'
+              }}
               onLoad={() => setLoaded(true)}
               onError={(e) => {
+                console.warn('Failed to load image:', work.imageUrl);
                 (e.currentTarget as HTMLImageElement).style.display = 'none';
               }}
             />
@@ -247,9 +257,15 @@ export const Gallery = () => {
             <div className="relative">
               <img
                 src={items[currentIndex].imageUrl || ''}
+                srcSet={`${items[currentIndex].imageUrl}?w=1280 1280w, ${items[currentIndex].imageUrl}?w=1920 1920w`}
+                sizes="(max-width: 1280px) 100vw, 1920px"
                 alt={items[currentIndex].title}
                 className="w-full h-auto object-contain max-h-[80vh]"
                 loading="eager"
+                style={{ 
+                  maxWidth: '100%',
+                  height: 'auto'
+                }}
               />
               {/* Prev/Next controls */}
               <button

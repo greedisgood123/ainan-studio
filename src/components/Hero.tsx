@@ -16,10 +16,10 @@ export const Hero = () => {
   const [canAttemptVideo, setCanAttemptVideo] = React.useState<boolean>(false);
 
   // Optional: allow hardcoded public URLs via env to skip upload/storage entirely
-  const overrideMp4 = (import.meta.env.VITE_HERO_MP4_URL as string | undefined) || undefined;
+  const overrideMp4 = (import.meta.env.VITE_HERO_MP4_URL as string | undefined) || "/hero-optimized.mp4";
   const overrideWebm = (import.meta.env.VITE_HERO_WEBM_URL as string | undefined) || undefined;
   const overridePoster = (import.meta.env.VITE_HERO_POSTER_URL as string | undefined) || undefined;
-  // Prefer Convex-provided URLs first; fall back to env overrides
+  // Prefer Convex-provided URLs first; fall back to env overrides (now using optimized video)
   const videoMp4 = (hero?.mp4Url as string | undefined) || overrideMp4;
   const videoWebm = (hero?.webmUrl as string | undefined) || overrideWebm;
   // Use bundled hero image as final fallback to avoid 404s in production

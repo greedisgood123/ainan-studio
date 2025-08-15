@@ -97,7 +97,7 @@ export function PortfolioSection({
 
   const filenameToTitle = (name: string) => name.replace(/\.[^.]+$/, "").replace(/[\-_]+/g, " ").trim()
 
-  // Resize utilities
+  // Enhanced resize utilities with better compression
   async function createWebpFromImage(
     file: File,
     opts: { mode: "cover" | "contain"; width: number; height?: number; quality?: number }
@@ -145,9 +145,42 @@ export function PortfolioSection({
       ctx.drawImage(img, 0, 0, img.width, img.height, dx, dy, dw, dh)
     }
 
-    const q = opts.quality ?? 0.82
+    const q = opts.quality ?? 0.85
     const blob: Blob = await new Promise((resolve) => canvas.toBlob((b) => resolve(b as Blob), "image/webp", q))
     return blob
+  }
+
+  // Automatic compression with size enforcement
+  async function autoOptimizeImage(file: File): Promise<{ optimized: Blob; originalSize: number; finalSize: number; compression: number }> {
+    const originalSize = file.size;
+    const targetMaxSize = 500 * 1024; // 500KB target
+    
+    let quality = 0.85;
+    let width = 1920; // Start with max width
+    let optimized: Blob;
+    
+    // First attempt with standard settings
+    optimized = await createWebpFromImage(file, { mode: "contain", width, quality });
+    
+    // If still too large, reduce quality and/or size
+    while (optimized.size > targetMaxSize && quality > 0.3) {
+      if (optimized.size > targetMaxSize * 2) {
+        // If way too large, reduce dimensions first
+        width = Math.max(800, width * 0.8);
+      } else {
+        // Fine-tune with quality
+        quality = Math.max(0.3, quality - 0.1);
+      }
+      
+      optimized = await createWebpFromImage(file, { mode: "contain", width, quality });
+    }
+    
+    const finalSize = optimized.size;
+    const compression = Math.round(((originalSize - finalSize) / originalSize) * 100);
+    
+    console.log(`Image optimization: ${(originalSize / 1024 / 1024).toFixed(2)}MB → ${(finalSize / 1024).toFixed(0)}KB (${compression}% reduction)`);
+    
+    return { optimized, originalSize, finalSize, compression };
   }
 
   async function createLargeDisplayWebp(file: File): Promise<Blob> {
