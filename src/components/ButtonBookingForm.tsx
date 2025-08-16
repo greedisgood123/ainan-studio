@@ -35,7 +35,7 @@ export const ButtonBookingForm = ({ packageName, isOpen, onClose }: ButtonBookin
   useEffect(() => {
     const fetchUnavailableDates = async () => {
       try {
-        const response = await apiClient.get('http://localhost:3001/api/bookings/unavailable-dates')
+        const response = await apiClient.get('/api/bookings/unavailable-dates')
         const data = await response.json()
         const unavailableDatesMs = data.map((item: any) => item.dateMs || item.date_ms)
         setUnavailableDays(unavailableDatesMs)
@@ -88,7 +88,7 @@ export const ButtonBookingForm = ({ packageName, isOpen, onClose }: ButtonBookin
         return
       }
       const desiredDateMs = new Date(desired.getFullYear(), desired.getMonth(), desired.getDate()).getTime()
-      await apiClient.post('http://localhost:3001/api/bookings', {
+              await apiClient.post('/api/bookings', {
         name: data.name,
         email: data.email,
         phone: data.phone,

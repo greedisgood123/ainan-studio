@@ -18,7 +18,7 @@ export const PricingSection = () => {
     const fetchPackages = async () => {
       try {
         const packages = await apiHelpers.handleResponse(
-          await fetch('http://localhost:3001/api/packages/public')
+          await fetch('/api/packages/public')
         );
         setData(packages);
       } catch (error) {

@@ -6,9 +6,11 @@ const app = new Hono()
 // CORS configuration
 app.use('*', cors({
   origin: [
+    'https://ainan-studio-frontend.pages.dev',
     'https://your-frontend-domain.pages.dev',
     'https://your-custom-domain.com',
-    'http://localhost:8080'
+    'http://localhost:8080',
+    'http://localhost:4173'
   ],
   credentials: true,
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],

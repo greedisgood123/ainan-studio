@@ -1,25 +1,16 @@
-import { Play, Camera, Zap, ArrowRight, ArrowLeft, Eye, Heart } from "lucide-react";
-import { ToPortfolioButton } from "@/components/ui/to-portfolio-button";
 import React, { useMemo, useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Play, Camera, Zap, Eye, Heart, ArrowRight, ArrowLeft } from "lucide-react";
+import { ToPortfolioButton } from "@/components/ui/to-portfolio-button";
+import { apiClient } from "@/lib/api";
 
-/**
- * Gallery Component - Displays featured work in a card layout
- * 
- * Features:
- * - Three content cards with image placeholders
- * - Service type badges with icons
- * - Professional titles and descriptions
- * - Call-to-action button
- * - Responsive design
- */
-type GalleryItem = {
+export interface GalleryItem {
   title: string;
   description: string;
   badge: string;
-  Icon: React.ElementType;
+  Icon: any;
   imageUrl?: string;
-};
+}
 
 const CreativeGalleryTile = ({
   work,
@@ -172,7 +163,7 @@ export const Gallery = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:3001/api/gallery/public')
+    apiClient.get('/api/gallery/public')
       .then(res => res.json())
       .then(galleryData => {
         setData(galleryData);

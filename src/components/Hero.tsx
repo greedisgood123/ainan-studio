@@ -17,7 +17,7 @@ export const Hero = () => {
   useEffect(() => {
     const fetchHeroSettings = async () => {
       try {
-        const response = await apiClient.get('http://localhost:3001/api/site-settings');
+        const response = await apiClient.get('/api/site-settings');
         const data = await response.json();
         setHero(data);
       } catch (error) {
