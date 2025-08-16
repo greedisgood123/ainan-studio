@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Camera, MapPin, Clock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { AssistantChat } from "./ui/assistant-chat";
+import { HeroVideo } from "./HeroVideo";
 import heroImage from "@/assets/hero-image.webp";
 import { useState, useEffect } from "react";
 import { apiClient } from "@/lib/api";
@@ -26,61 +27,38 @@ export const Hero = () => {
     };
     fetchHeroSettings();
   }, []);
-  const [videoReady, setVideoReady] = React.useState(false);
-  const [videoError, setVideoError] = React.useState<string | null>(null);
-  const [canAttemptVideo, setCanAttemptVideo] = React.useState<boolean>(false);
 
-  // Optional: allow hardcoded public URLs via env to skip upload/storage entirely
-  const overrideMp4 = (import.meta.env.VITE_HERO_MP4_URL as string | undefined) || "/hero-optimized.mp4";
-  const overrideWebm = (import.meta.env.VITE_HERO_WEBM_URL as string | undefined) || undefined;
-  const overridePoster = (import.meta.env.VITE_HERO_POSTER_URL as string | undefined) || undefined;
-  // Prefer backend-provided URLs first; fall back to env overrides (now using optimized video)
-  const videoMp4 = (hero?.mp4Url as string | undefined) || overrideMp4;
-  const videoWebm = (hero?.webmUrl as string | undefined) || overrideWebm;
-  // Use bundled hero image as final fallback to avoid 404s in production
-  const videoPoster = (hero?.posterUrl as string | undefined) || overridePoster || (heroImage as string);
+  // Video configuration - you can change these values
+  const videoConfig = {
+    // Option 1: Use YouTube (recommended for Cloudflare Pages)
+    youtubeId: import.meta.env.VITE_HERO_YOUTUBE_ID || undefined,
+    
+    // Option 2: Use Vimeo
+    vimeoId: import.meta.env.VITE_HERO_VIMEO_ID || undefined,
+    
+    // Option 3: Use local video (will be optimized for Cloudflare)
+    videoUrl: import.meta.env.VITE_HERO_VIDEO_URL || "/hero-cloudflare.mp4",
+    
+    // Poster image
+    posterUrl: hero?.posterUrl || heroImage
+  };
 
-  // If we have video URLs attempt playback; if it never becomes ready, fall back after a short timeout
-  React.useEffect(() => {
-    if (!videoMp4 && !videoWebm) return;
-    setCanAttemptVideo(true); // try to play even if cross-origin HEAD would have failed
-    if (videoReady) return;
-    const t = setTimeout(() => {
-      if (!videoReady) setVideoError((prev) => prev ?? "timeout");
-    }, 4000);
-    return () => clearTimeout(t);
-  }, [videoMp4, videoWebm, videoReady]);
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Always render an image fallback. Overlay the video only when ready. */}
+      {/* Background image fallback */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${heroImage})` }}
       />
-      {(videoMp4 || videoWebm) && !videoError && canAttemptVideo && (
-        <video
-          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="auto"
-          poster={videoPoster}
-          crossOrigin="anonymous"
-          onCanPlay={() => setVideoReady(true)}
-          onLoadedMetadata={() => setVideoReady(true)}
-          onLoadedData={() => setVideoReady(true)}
-          onError={(e) => {
-            console.error("Hero video failed to load", e);
-            setVideoError("load-error");
-          }}
-          style={{ opacity: videoReady ? 1 : 0 }}
-        >
-          {videoWebm && <source src={videoWebm} type="video/webm" />}
-          {videoMp4 && <source src={videoMp4} type="video/mp4" />}
-          Your browser does not support the video tag.
-        </video>
-      )}
+      
+      {/* Hero Video Component */}
+      <HeroVideo
+        className="absolute inset-0"
+        youtubeId={videoConfig.youtubeId}
+        vimeoId={videoConfig.vimeoId}
+        videoUrl={videoConfig.videoUrl}
+        posterUrl={videoConfig.posterUrl}
+      />
 
       {/* Enhanced overlay for better text readability */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70"></div>
