@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import galleryImages from "@/assets/imagesCarousel";
 
 export const Portfolio = () => {
   const [activeFilter, setActiveFilter] = useState("All");
@@ -14,11 +15,11 @@ export const Portfolio = () => {
       title: "Tech Conference Live Stream",
       description: "Multi-camera setup for 1,000+ attendees with real-time streaming and interactive Q&A sessions.",
       category: "Livefeed",
-      coverUrl: "/src/assets/imagesCarousel/0FK_0696.webp",
+      coverUrl: galleryImages[9], // 0FK_0696.webp
       photos: [
-        "/src/assets/imagesCarousel/0FK_0696.webp",
-        "/src/assets/imagesCarousel/AIN00523.webp",
-        "/src/assets/imagesCarousel/FKP03731.webp"
+        galleryImages[9], // 0FK_0696.webp
+        galleryImages[1], // AIN00523.webp
+        galleryImages[5]  // FKP03731.webp
       ]
     },
     {
@@ -26,11 +27,11 @@ export const Portfolio = () => {
       title: "Corporate Headshot Session",
       description: "Professional headshots for 50+ executives in a single day, maintaining consistent quality across all team members.",
       category: "Corporate",
-      coverUrl: "/src/assets/imagesCarousel/AIN00523.webp",
+      coverUrl: galleryImages[1], // AIN00523.webp
       photos: [
-        "/src/assets/imagesCarousel/AIN00523.webp",
-        "/src/assets/imagesCarousel/AIN00718.webp",
-        "/src/assets/imagesCarousel/DSC_3411.webp"
+        galleryImages[1], // AIN00523.webp
+        galleryImages[2], // AIN00718.webp
+        galleryImages[4]  // DSC_3411.webp
       ]
     },
     {
@@ -38,11 +39,11 @@ export const Portfolio = () => {
       title: "Wedding Live Coverage",
       description: "Complete ceremony and reception with cinematic highlights, capturing every precious moment of the special day.",
       category: "Weddings",
-      coverUrl: "/src/assets/imagesCarousel/FKP03731.webp",
+      coverUrl: galleryImages[5], // FKP03731.webp
       photos: [
-        "/src/assets/imagesCarousel/FKP03731.webp",
-        "/src/assets/imagesCarousel/FKP03833.webp",
-        "/src/assets/imagesCarousel/FKP03935.webp"
+        galleryImages[5], // FKP03731.webp
+        galleryImages[6], // FKP03833.webp
+        galleryImages[7]  // FKP03935.webp
       ]
     },
     {
@@ -50,11 +51,11 @@ export const Portfolio = () => {
       title: "Product Launch Event",
       description: "High-end product photography and live streaming for brand launch, reaching global audience in real-time.",
       category: "Events",
-      coverUrl: "/src/assets/imagesCarousel/AIN00718.webp",
+      coverUrl: galleryImages[2], // AIN00718.webp
       photos: [
-        "/src/assets/imagesCarousel/AIN00718.webp",
-        "/src/assets/imagesCarousel/0FK_1526.webp",
-        "/src/assets/imagesCarousel/AIN00523.webp"
+        galleryImages[2], // AIN00718.webp
+        galleryImages[8], // 0FK_1526.webp
+        galleryImages[1]  // AIN00523.webp
       ]
     },
     {
@@ -62,11 +63,11 @@ export const Portfolio = () => {
       title: "Corporate Training Session",
       description: "Multi-location training session with interactive Q&A, ensuring seamless knowledge transfer across teams.",
       category: "Livefeed",
-      coverUrl: "/src/assets/imagesCarousel/DSC_3411.webp",
+      coverUrl: galleryImages[4], // DSC_3411.webp
       photos: [
-        "/src/assets/imagesCarousel/DSC_3411.webp",
-        "/src/assets/imagesCarousel/FKP03731.webp",
-        "/src/assets/imagesCarousel/0FK_0696.webp"
+        galleryImages[4], // DSC_3411.webp
+        galleryImages[5], // FKP03731.webp
+        galleryImages[9]  // 0FK_0696.webp
       ]
     },
     {
@@ -74,11 +75,11 @@ export const Portfolio = () => {
       title: "Award Ceremony Coverage",
       description: "Red carpet photography and live award ceremony streaming, capturing the glamour and excitement of the event.",
       category: "Events",
-      coverUrl: "/src/assets/imagesCarousel/FKP03833.webp",
+      coverUrl: galleryImages[6], // FKP03833.webp
       photos: [
-        "/src/assets/imagesCarousel/FKP03833.webp",
-        "/src/assets/imagesCarousel/FKP03935.webp",
-        "/src/assets/imagesCarousel/AIN00718.webp"
+        galleryImages[6], // FKP03833.webp
+        galleryImages[7], // FKP03935.webp
+        galleryImages[2]  // AIN00718.webp
       ]
     },
     {
@@ -86,11 +87,11 @@ export const Portfolio = () => {
       title: "Executive Portrait Session",
       description: "Premium portrait photography for C-level executives, creating powerful personal branding images.",
       category: "Portraits",
-      coverUrl: "/src/assets/imagesCarousel/FKP03935.webp",
+      coverUrl: galleryImages[7], // FKP03935.webp
       photos: [
-        "/src/assets/imagesCarousel/FKP03935.webp",
-        "/src/assets/imagesCarousel/AIN00523.webp",
-        "/src/assets/imagesCarousel/DSC_3411.webp"
+        galleryImages[7], // FKP03935.webp
+        galleryImages[1], // AIN00523.webp
+        galleryImages[4]  // DSC_3411.webp
       ]
     },
     {
@@ -98,11 +99,11 @@ export const Portfolio = () => {
       title: "Team Building Event",
       description: "Dynamic coverage of corporate team building activities, showcasing company culture and employee engagement.",
       category: "Corporate",
-      coverUrl: "/src/assets/imagesCarousel/0FK_1526.webp",
+      coverUrl: galleryImages[8], // 0FK_1526.webp
       photos: [
-        "/src/assets/imagesCarousel/0FK_1526.webp",
-        "/src/assets/imagesCarousel/FKP03731.webp",
-        "/src/assets/imagesCarousel/AIN00718.webp"
+        galleryImages[8], // 0FK_1526.webp
+        galleryImages[5], // FKP03731.webp
+        galleryImages[2]  // AIN00718.webp
       ]
     },
     {
@@ -110,11 +111,35 @@ export const Portfolio = () => {
       title: "Intimate Wedding Ceremony",
       description: "Breathtaking coverage of intimate wedding ceremonies, focusing on emotional moments and personal touches.",
       category: "Weddings",
-      coverUrl: "/src/assets/imagesCarousel/AIN00523.webp",
+      coverUrl: galleryImages[1], // AIN00523.webp
       photos: [
-        "/src/assets/imagesCarousel/AIN00523.webp",
-        "/src/assets/imagesCarousel/FKP03833.webp",
-        "/src/assets/imagesCarousel/0FK_0696.webp"
+        galleryImages[1], // AIN00523.webp
+        galleryImages[6], // FKP03833.webp
+        galleryImages[9]  // 0FK_0696.webp
+      ]
+    },
+    {
+      id: "10",
+      title: "Studio Photography Session",
+      description: "Professional studio photography with controlled lighting and perfect backdrops for corporate branding.",
+      category: "Portraits",
+      coverUrl: galleryImages[3], // Amin-Rashidi-Studio-664.webp
+      photos: [
+        galleryImages[3], // Amin-Rashidi-Studio-664.webp
+        galleryImages[0], // 20191208-LAN_0281.webp
+        galleryImages[1]  // AIN00523.webp
+      ]
+    },
+    {
+      id: "11",
+      title: "Corporate Event Photography",
+      description: "Comprehensive coverage of corporate events, conferences, and business meetings with professional documentation.",
+      category: "Corporate",
+      coverUrl: galleryImages[0], // 20191208-LAN_0281.webp
+      photos: [
+        galleryImages[0], // 20191208-LAN_0281.webp
+        galleryImages[2], // AIN00718.webp
+        galleryImages[4]  // DSC_3411.webp
       ]
     }
   ];

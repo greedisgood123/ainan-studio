@@ -2,6 +2,7 @@ import React, { useMemo, useState, useRef } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Play, Camera, Zap, Eye, Heart, ArrowRight, ArrowLeft } from "lucide-react";
 import { ToPortfolioButton } from "@/components/ui/to-portfolio-button";
+import galleryImages from "@/assets/imagesCarousel";
 
 export interface GalleryItem {
   title: string;
@@ -167,42 +168,42 @@ export const Gallery = () => {
       description: "Multi-camera setup for 1,000+ attendees with real-time streaming", 
       badge: "Livefeed", 
       iconName: "Play",
-      imageUrl: "/src/assets/imagesCarousel/0FK_0696.webp"
+      imageUrl: galleryImages[9] // 0FK_0696.webp
     },
     { 
       title: "Corporate Headshot Session", 
       description: "Professional headshots for 50+ executives in a single day", 
       badge: "Photography", 
       iconName: "Camera",
-      imageUrl: "/src/assets/imagesCarousel/AIN00523.webp"
+      imageUrl: galleryImages[1] // AIN00523.webp
     },
     { 
       title: "Wedding Live Coverage", 
       description: "Complete ceremony and reception with cinematic highlights", 
       badge: "Event Coverage", 
       iconName: "Zap",
-      imageUrl: "/src/assets/imagesCarousel/FKP03731.webp"
+      imageUrl: galleryImages[5] // FKP03731.webp
     },
     { 
       title: "Product Launch Event", 
       description: "High-end product photography and live streaming for brand launch", 
       badge: "Commercial", 
       iconName: "Camera",
-      imageUrl: "/src/assets/imagesCarousel/AIN00718.webp"
+      imageUrl: galleryImages[2] // AIN00718.webp
     },
     { 
       title: "Corporate Training Session", 
       description: "Multi-location training session with interactive Q&A", 
       badge: "Education", 
       iconName: "Play",
-      imageUrl: "/src/assets/imagesCarousel/DSC_3411.webp"
+      imageUrl: galleryImages[4] // DSC_3411.webp
     },
     { 
       title: "Award Ceremony Coverage", 
       description: "Red carpet photography and live award ceremony streaming", 
       badge: "Events", 
       iconName: "Zap",
-      imageUrl: "/src/assets/imagesCarousel/FKP03833.webp"
+      imageUrl: galleryImages[6] // FKP03833.webp
     },
   ];
 
