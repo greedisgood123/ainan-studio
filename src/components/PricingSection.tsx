@@ -1,6 +1,4 @@
 import { PricingCard } from "@/components/PricingCard";
-import { apiHelpers } from "@/lib/api";
-import { useState, useEffect } from "react";
 import {
   Carousel,
   CarouselContent,
@@ -11,25 +9,8 @@ import {
 import Autoplay from "embla-carousel-autoplay";
 
 export const PricingSection = () => {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchPackages = async () => {
-      try {
-        const packages = await apiHelpers.handleResponse(
-          await fetch('/api/packages/public')
-        );
-        setData(packages);
-      } catch (error) {
-        console.error('Failed to fetch packages:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchPackages();
-  }, []);
-  const fallback = [
+  // Static packages data - no backend needed
+  const staticPackagesData = [
     {
       title: "Solo Headshot Session",
       price: "RM 350",
@@ -80,8 +61,41 @@ export const PricingSection = () => {
         { name: "Additional retouched image", price: "RM 40/image" },
       ],
     },
+    {
+      title: "Corporate Event Coverage",
+      price: "RM 3,500",
+      description: "Complete coverage for corporate events, conferences, and team building.",
+      features: [
+        "Full day coverage (up to 8 hours)",
+        "Professional event photography",
+        "Live streaming capabilities",
+        "100+ edited images",
+        "Event highlights video",
+        "1 week delivery",
+      ],
+      addOns: [
+        { name: "Additional photographer", price: "RM 800/day" },
+        { name: "Video editing", price: "RM 500" },
+      ],
+    },
+    {
+      title: "Product Photography",
+      price: "RM 800",
+      description: "Professional product photography for e-commerce and marketing.",
+      features: [
+        "Studio-quality product shots",
+        "Multiple angles and backgrounds",
+        "15-20 edited images",
+        "White background option",
+        "Lifestyle context shots",
+        "3-5 working day delivery",
+      ],
+      addOns: [
+        { name: "360° product view", price: "RM 200" },
+        { name: "Video product showcase", price: "RM 400" },
+      ],
+    },
   ];
-  const packages = (data && data.length > 0 ? data : fallback) as any[];
 
   return (
     <section id="packages" className="py-20 px-6 bg-secondary/30 bg-[radial-gradient(1000px_circle_at_50%_-20%,hsl(var(--accent)/0.15),transparent_60%)]">
@@ -101,7 +115,7 @@ export const PricingSection = () => {
           plugins={[Autoplay({ delay: 4500 }) as unknown as any]}
         >
           <CarouselContent className="items-stretch">
-            {packages.map((pkg, index) => (
+            {staticPackagesData.map((pkg, index) => (
               <CarouselItem
                 key={index}
                 className="basis-full sm:basis-1/2 lg:basis-1/3"

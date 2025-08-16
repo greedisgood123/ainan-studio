@@ -1,8 +1,7 @@
-import React, { useMemo, useState, useEffect, useRef } from "react";
+import React, { useMemo, useState, useRef } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Play, Camera, Zap, Eye, Heart, ArrowRight, ArrowLeft } from "lucide-react";
 import { ToPortfolioButton } from "@/components/ui/to-portfolio-button";
-import { apiClient } from "@/lib/api";
 
 export interface GalleryItem {
   title: string;
@@ -28,7 +27,7 @@ const CreativeGalleryTile = ({
   const [isVisible, setIsVisible] = useState(false);
   const tileRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -158,53 +157,64 @@ const CreativeGalleryTile = ({
 };
 
 export const Gallery = () => {
-  // Use local backend instead of Convex
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    apiClient.get('/api/gallery/public')
-      .then(res => res.json())
-      .then(galleryData => {
-        setData(galleryData);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Failed to fetch gallery:', err);
-        setLoading(false);
-      });
-  }, []);
   const iconMap: Record<string, any> = { Play, Camera, Zap };
   const [currentIndex, setCurrentIndex] = useState<number | null>(null);
-  const fallback = [
-    { title: "Tech Conference Live Stream", description: "Multi-camera setup for 1,000+ attendees with real-time streaming", badge: "Livefeed", iconName: "Play" },
-    { title: "Corporate Headshot Session", description: "Professional headshots for 50+ executives in a single day", badge: "Photography", iconName: "Camera" },
-    { title: "Wedding Live Coverage", description: "Complete ceremony and reception with cinematic highlights", badge: "Event Coverage", iconName: "Zap" },
+  
+  // Static gallery data - no backend needed
+  const staticGalleryData = [
+    { 
+      title: "Tech Conference Live Stream", 
+      description: "Multi-camera setup for 1,000+ attendees with real-time streaming", 
+      badge: "Livefeed", 
+      iconName: "Play",
+      imageUrl: "/src/assets/imagesCarousel/0FK_0696.webp"
+    },
+    { 
+      title: "Corporate Headshot Session", 
+      description: "Professional headshots for 50+ executives in a single day", 
+      badge: "Photography", 
+      iconName: "Camera",
+      imageUrl: "/src/assets/imagesCarousel/AIN00523.webp"
+    },
+    { 
+      title: "Wedding Live Coverage", 
+      description: "Complete ceremony and reception with cinematic highlights", 
+      badge: "Event Coverage", 
+      iconName: "Zap",
+      imageUrl: "/src/assets/imagesCarousel/FKP03731.webp"
+    },
+    { 
+      title: "Product Launch Event", 
+      description: "High-end product photography and live streaming for brand launch", 
+      badge: "Commercial", 
+      iconName: "Camera",
+      imageUrl: "/src/assets/imagesCarousel/AIN00718.webp"
+    },
+    { 
+      title: "Corporate Training Session", 
+      description: "Multi-location training session with interactive Q&A", 
+      badge: "Education", 
+      iconName: "Play",
+      imageUrl: "/src/assets/imagesCarousel/DSC_3411.webp"
+    },
+    { 
+      title: "Award Ceremony Coverage", 
+      description: "Red carpet photography and live award ceremony streaming", 
+      badge: "Events", 
+      iconName: "Zap",
+      imageUrl: "/src/assets/imagesCarousel/FKP03833.webp"
+    },
   ];
 
   const items = useMemo<GalleryItem[]>(() => {
-    try {
-      // Use data from local backend or fallback
-      const source = (data && Array.isArray(data) && data.length > 0) ? data : fallback;
-      return source.map((i: any) => ({
-        title: i.title,
-        description: i.description,
-        badge: i.badge,
-        Icon: iconMap[i.iconName] || Play,
-        imageUrl: i.imageUrl || undefined, // local backend provides direct URLs
-      }));
-    } catch (err) {
-      console.error('Error processing gallery data:', err);
-      // Fallback to static items on any unexpected error
-      return fallback.map((i: any) => ({
-        title: i.title,
-        description: i.description,
-        badge: i.badge,
-        Icon: iconMap[i.iconName] || Play,
-        imageUrl: undefined,
-      }));
-    }
-  }, [data]);
+    return staticGalleryData.map((i: any) => ({
+      title: i.title,
+      description: i.description,
+      badge: i.badge,
+      Icon: iconMap[i.iconName] || Play,
+      imageUrl: i.imageUrl,
+    }));
+  }, []);
 
   const getLayoutType = (_index: number): "hero" | "tall" | "wide" | "square" => "square";
 
@@ -240,7 +250,6 @@ export const Gallery = () => {
         {/* Call-to-action button */}
         <div className="text-center">
           <ToPortfolioButton />
-
         </div>
       </div>
 

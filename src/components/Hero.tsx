@@ -5,28 +5,10 @@ import { useNavigate } from "react-router-dom";
 import { AssistantChat } from "./ui/assistant-chat";
 import { HeroVideo } from "./HeroVideo";
 import heroImage from "@/assets/hero-image.webp";
-import { useState, useEffect } from "react";
-import { apiClient } from "@/lib/api";
 import React from "react";
 
 export const Hero = () => {
   const navigate = useNavigate();
-  const [hero, setHero] = useState<any>(null);
-
-  // Fetch hero settings from local backend
-  useEffect(() => {
-    const fetchHeroSettings = async () => {
-      try {
-        const response = await apiClient.get('/api/site-settings');
-        const data = await response.json();
-        setHero(data);
-      } catch (error) {
-        console.debug('Failed to fetch hero settings:', error);
-        // Continue with fallback values
-      }
-    };
-    fetchHeroSettings();
-  }, []);
 
   // Video configuration - you can change these values
   const videoConfig = {
@@ -40,7 +22,7 @@ export const Hero = () => {
     videoUrl: import.meta.env.VITE_HERO_VIDEO_URL || undefined, // Removed default video file
     
     // Poster image
-    posterUrl: hero?.posterUrl || heroImage
+    posterUrl: heroImage
   };
 
   return (

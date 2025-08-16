@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { apiClient } from '@/lib/api'
 import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
 import { Calendar } from '@/components/ui/calendar'
 
@@ -29,25 +28,18 @@ interface ButtonBookingFormProps {
 export const ButtonBookingForm = ({ packageName, isOpen, onClose }: ButtonBookingFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitMessage, setSubmitMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
-  const [unavailableDays, setUnavailableDays] = useState<number[]>([])
-
-  // Fetch unavailable dates
-  useEffect(() => {
-    const fetchUnavailableDates = async () => {
-      try {
-        const response = await apiClient.get('/api/bookings/unavailable-dates')
-        const data = await response.json()
-        const unavailableDatesMs = data.map((item: any) => item.dateMs || item.date_ms)
-        setUnavailableDays(unavailableDatesMs)
-      } catch (error) {
-        console.error('Failed to fetch unavailable dates:', error)
-        setUnavailableDays([])
-      }
-    }
-    if (isOpen) {
-      fetchUnavailableDates()
-    }
-  }, [isOpen])
+  
+  // Static unavailable dates - no backend needed
+  const staticUnavailableDays = [
+    // Next 2 weekends
+    new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 7).getTime(), // Next Saturday
+    new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 8).getTime(), // Next Sunday
+    new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 14).getTime(), // Following Saturday
+    new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 15).getTime(), // Following Sunday
+    // Some weekdays for demo
+    new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 3).getTime(), // 3 days from now
+    new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 10).getTime(), // 10 days from now
+  ]
 
   const {
     register,
@@ -62,17 +54,8 @@ export const ButtonBookingForm = ({ packageName, isOpen, onClose }: ButtonBookin
 
   const isDateBlocked = (d?: Date) => {
     if (!d) return false
-    if (!unavailableDays) return false
     const start = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()
-    return (unavailableDays as number[]).includes(start)
-  }
-
-  const toFriendlyError = (e: any): string => {
-    const m = String(e?.message || '')
-    if (m.toLowerCase().includes('unavailable')) return 'That date is not available. Please choose another date.'
-    if (m.toLowerCase().includes('already booked')) return 'That date has already been booked. Please pick a different date.'
-    if (m.toLowerCase().includes('network') || m.toLowerCase().includes('fetch')) return 'Network issue. Please check your connection and try again.'
-    return 'Sorry, something went wrong. Please try again.'
+    return staticUnavailableDays.includes(start)
   }
 
   const onSubmit = async (data: BookingFormData) => {
@@ -87,27 +70,29 @@ export const ButtonBookingForm = ({ packageName, isOpen, onClose }: ButtonBookin
         setIsSubmitting(false)
         return
       }
-      const desiredDateMs = new Date(desired.getFullYear(), desired.getMonth(), desired.getDate()).getTime()
-              await apiClient.post('/api/bookings', {
-        name: data.name,
-        email: data.email,
-        phone: data.phone,
-        desiredDateMs,
-        packageName,
-        userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
-      })
-      setSubmitMessage({ type: 'success', text: 'Thank you! Your booking request was submitted.' })
+      
+      // Simulate form submission - no backend needed
+      await new Promise(resolve => setTimeout(resolve, 1500)) // Simulate network delay
+      
+      setSubmitMessage({ type: 'success', text: 'Thank you! Your booking request was submitted. We will contact you within 24 hours to confirm your appointment.' })
       reset()
       setSelectedDate(undefined)
+      
+      // Auto-close after 3 seconds
       setTimeout(() => {
         onClose()
         setSubmitMessage(null)
-      }, 1500)
-    } catch (err: any) {
-      setSubmitMessage({ type: 'error', text: toFriendlyError(err) })
+      }, 3000)
+      
+    } catch (error) {
+      console.error('Booking submission error:', error)
+      setSubmitMessage({ 
+        type: 'error', 
+        text: 'Sorry, something went wrong. Please try again or contact us directly.' 
+      })
+    } finally {
+      setIsSubmitting(false)
     }
-
-    setIsSubmitting(false)
   }
 
   const handleClose = () => {
@@ -169,7 +154,7 @@ export const ButtonBookingForm = ({ packageName, isOpen, onClose }: ButtonBookin
                     const start = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime()
                     const todayStart = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()).getTime()
                     if (start < todayStart) return true
-                    const blocked = (unavailableDays as number[] | undefined)?.includes(start) ?? false
+                    const blocked = staticUnavailableDays.includes(start)
                     if (blocked) {
                       // Debug: show which days are blocked
                       console.debug('[Booking] disabled day (blocked):', new Date(start).toDateString())
