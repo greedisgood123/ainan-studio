@@ -1,13 +1,13 @@
-## Ainan Studio
+# Ainan Studio
 
-Local development
+Professional photography studio website built with React, TypeScript, and Vite.
 
-```sh
-npm i
-npm run dev
-```
+## 🚀 Deployment Status
 
-Tech stack
-- Vite + React + TypeScript
-- shadcn-ui + Tailwind CSS
-- Convex
+✅ Ready for Cloudflare Pages deployment
+✅ All large video files removed
+✅ Clean build configuration
+
+## 🎬 Video Solutions
+
+See `VIDEO_SOLUTIONS.md` for video hosting options.
