@@ -29,4 +29,7 @@ build/
 *.ntvs*
 *.njsproj
 *.sln
-*.sw?   
+*.sw?
+
+# Package manager lockfiles
+bun.lockb   
