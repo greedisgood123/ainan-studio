@@ -1,22 +1,133 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { usePortfolioPublic } from "@/hooks/useApi";
-
 
 export const Portfolio = () => {
   const [activeFilter, setActiveFilter] = useState("All");
-  const filters = ["All", "Weddings", "Corporate", "Livefeed"];
-  const { data: albums, loading } = usePortfolioPublic();
+  const filters = ["All", "Weddings", "Corporate", "Livefeed", "Portraits", "Events"];
+  
+  // Static portfolio data - no backend needed
+  const staticPortfolioData = [
+    {
+      id: "1",
+      title: "Tech Conference Live Stream",
+      description: "Multi-camera setup for 1,000+ attendees with real-time streaming and interactive Q&A sessions.",
+      category: "Livefeed",
+      coverUrl: "/src/assets/imagesCarousel/0FK_0696.webp",
+      photos: [
+        "/src/assets/imagesCarousel/0FK_0696.webp",
+        "/src/assets/imagesCarousel/AIN00523.webp",
+        "/src/assets/imagesCarousel/FKP03731.webp"
+      ]
+    },
+    {
+      id: "2",
+      title: "Corporate Headshot Session",
+      description: "Professional headshots for 50+ executives in a single day, maintaining consistent quality across all team members.",
+      category: "Corporate",
+      coverUrl: "/src/assets/imagesCarousel/AIN00523.webp",
+      photos: [
+        "/src/assets/imagesCarousel/AIN00523.webp",
+        "/src/assets/imagesCarousel/AIN00718.webp",
+        "/src/assets/imagesCarousel/DSC_3411.webp"
+      ]
+    },
+    {
+      id: "3",
+      title: "Wedding Live Coverage",
+      description: "Complete ceremony and reception with cinematic highlights, capturing every precious moment of the special day.",
+      category: "Weddings",
+      coverUrl: "/src/assets/imagesCarousel/FKP03731.webp",
+      photos: [
+        "/src/assets/imagesCarousel/FKP03731.webp",
+        "/src/assets/imagesCarousel/FKP03833.webp",
+        "/src/assets/imagesCarousel/FKP03935.webp"
+      ]
+    },
+    {
+      id: "4",
+      title: "Product Launch Event",
+      description: "High-end product photography and live streaming for brand launch, reaching global audience in real-time.",
+      category: "Events",
+      coverUrl: "/src/assets/imagesCarousel/AIN00718.webp",
+      photos: [
+        "/src/assets/imagesCarousel/AIN00718.webp",
+        "/src/assets/imagesCarousel/0FK_1526.webp",
+        "/src/assets/imagesCarousel/AIN00523.webp"
+      ]
+    },
+    {
+      id: "5",
+      title: "Corporate Training Session",
+      description: "Multi-location training session with interactive Q&A, ensuring seamless knowledge transfer across teams.",
+      category: "Livefeed",
+      coverUrl: "/src/assets/imagesCarousel/DSC_3411.webp",
+      photos: [
+        "/src/assets/imagesCarousel/DSC_3411.webp",
+        "/src/assets/imagesCarousel/FKP03731.webp",
+        "/src/assets/imagesCarousel/0FK_0696.webp"
+      ]
+    },
+    {
+      id: "6",
+      title: "Award Ceremony Coverage",
+      description: "Red carpet photography and live award ceremony streaming, capturing the glamour and excitement of the event.",
+      category: "Events",
+      coverUrl: "/src/assets/imagesCarousel/FKP03833.webp",
+      photos: [
+        "/src/assets/imagesCarousel/FKP03833.webp",
+        "/src/assets/imagesCarousel/FKP03935.webp",
+        "/src/assets/imagesCarousel/AIN00718.webp"
+      ]
+    },
+    {
+      id: "7",
+      title: "Executive Portrait Session",
+      description: "Premium portrait photography for C-level executives, creating powerful personal branding images.",
+      category: "Portraits",
+      coverUrl: "/src/assets/imagesCarousel/FKP03935.webp",
+      photos: [
+        "/src/assets/imagesCarousel/FKP03935.webp",
+        "/src/assets/imagesCarousel/AIN00523.webp",
+        "/src/assets/imagesCarousel/DSC_3411.webp"
+      ]
+    },
+    {
+      id: "8",
+      title: "Team Building Event",
+      description: "Dynamic coverage of corporate team building activities, showcasing company culture and employee engagement.",
+      category: "Corporate",
+      coverUrl: "/src/assets/imagesCarousel/0FK_1526.webp",
+      photos: [
+        "/src/assets/imagesCarousel/0FK_1526.webp",
+        "/src/assets/imagesCarousel/FKP03731.webp",
+        "/src/assets/imagesCarousel/AIN00718.webp"
+      ]
+    },
+    {
+      id: "9",
+      title: "Intimate Wedding Ceremony",
+      description: "Breathtaking coverage of intimate wedding ceremonies, focusing on emotional moments and personal touches.",
+      category: "Weddings",
+      coverUrl: "/src/assets/imagesCarousel/AIN00523.webp",
+      photos: [
+        "/src/assets/imagesCarousel/AIN00523.webp",
+        "/src/assets/imagesCarousel/FKP03833.webp",
+        "/src/assets/imagesCarousel/0FK_0696.webp"
+      ]
+    }
+  ];
+
   const items = useMemo(
     () => {
-      const allItems = (albums ?? []).map((i: any) => ({
-        id: i.id || i._id,
+      const allItems = staticPortfolioData.map((i: any) => ({
+        id: i.id,
         title: i.title,
         description: i.description,
         category: i.category,
-        coverUrl: (i.coverImageUrl || i.coverUrl) as string | undefined,
+        coverUrl: i.coverUrl,
+        photos: i.photos
       }));
       
       // Filter by category if not "All"
@@ -25,28 +136,33 @@ export const Portfolio = () => {
       }
       return allItems.filter(item => item.category === activeFilter);
     },
-    [albums, activeFilter]
+    [activeFilter]
   );
 
-  // Lightbox state (temporarily disabled during migration)
+  // Lightbox state
   const [activeAlbumId, setActiveAlbumId] = useState<string | null>(null);
   const [lightboxIndex, setLightboxIndex] = useState<number>(0);
-  // TODO: Implement album photos API call
-  const photos: any[] | undefined = undefined;
   const isLightboxOpen = activeAlbumId !== null;
+  
+  // Get photos for the active album
+  const activeAlbum = items.find(item => item.id === activeAlbumId);
+  const photos = activeAlbum?.photos || [];
 
+  // Keyboard navigation for lightbox
   useEffect(() => {
-    if (!isLightboxOpen || !photos) return;
+    if (!isLightboxOpen || photos.length === 0) return;
+    
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") setActiveAlbumId(null);
       if (e.key === "ArrowRight")
-        setLightboxIndex((i) => (photos.length ? (i + 1) % photos.length : 0));
+        setLightboxIndex((i) => (i + 1) % photos.length);
       if (e.key === "ArrowLeft")
-        setLightboxIndex((i) => (photos.length ? (i - 1 + photos.length) % photos.length : 0));
+        setLightboxIndex((i) => (i - 1 + photos.length) % photos.length);
     };
+    
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [isLightboxOpen, photos]);
+  }, [isLightboxOpen, photos.length]);
 
   return (
     <div className="min-h-screen bg-white">
@@ -157,25 +273,23 @@ export const Portfolio = () => {
           <div className="space-y-3">
             <DialogHeader>
               <DialogTitle>
-                {items.find((a) => a.id === activeAlbumId)?.title || "Album"}
+                {activeAlbum?.title || "Album"}
               </DialogTitle>
               <DialogDescription>
-                {items.find((a) => a.id === activeAlbumId)?.description || ""}
+                {activeAlbum?.description || ""}
               </DialogDescription>
             </DialogHeader>
 
             <div className="w-full max-h-[80vh] flex items-center justify-center bg-black/5 rounded">
-              {!photos ? (
-                <div className="p-16 text-sm text-muted-foreground">Loading photos…</div>
-              ) : photos.length === 0 ? (
+              {photos.length === 0 ? (
                 <div className="p-16 text-sm text-muted-foreground">No photos in this album yet.</div>
               ) : (
                 <img
-                  src={photos[lightboxIndex]?.imageUrl}
-                  srcSet={`${photos[lightboxIndex]?.imageUrl} 1600w`}
+                  src={photos[lightboxIndex]}
+                  srcSet={`${photos[lightboxIndex]} 1600w`}
                   sizes="100vw"
-                  alt={items.find((a) => a.id === activeAlbumId)?.title || ""}
-                  className="max-h-[78vh] w-auto object-contain"
+                  alt={activeAlbum?.title || ""}
+                  className="max-h-[78vh] w-auto object-contain cursor-pointer"
                   onClick={() => setLightboxIndex((i) => (i + 1) % photos.length)}
                 />
               )}
@@ -183,12 +297,12 @@ export const Portfolio = () => {
 
             <div className="flex items-center justify-between">
               <div className="text-sm text-muted-foreground">
-                {photos && photos.length > 0 ? `${lightboxIndex + 1} / ${photos.length} — Use ← → or click image to navigate` : ""}
+                {photos.length > 0 ? `${lightboxIndex + 1} / ${photos.length} — Use ← → or click image to navigate` : ""}
               </div>
-              {photos && photos.length > 0 && (
+              {photos.length > 0 && (
                 <a
                   className="text-sm underline"
-                  href={photos[lightboxIndex]?.imageUrl}
+                  href={photos[lightboxIndex]}
                   target="_blank"
                   rel="noreferrer"
                 >
