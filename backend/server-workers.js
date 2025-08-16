@@ -167,4 +167,17 @@ app.get('/api/site-settings', async (c) => {
   return c.json(settings)
 })
 
+// Analytics endpoint
+app.post('/api/analytics/track', async (c) => {
+  const analyticsData = await c.req.json()
+  
+  // Mock analytics tracking
+  console.log('Analytics tracked:', analyticsData)
+  
+  return c.json({
+    success: true,
+    timestamp: new Date().toISOString()
+  })
+})
+
 export default app

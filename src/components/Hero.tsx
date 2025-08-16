@@ -37,7 +37,7 @@ export const Hero = () => {
     vimeoId: import.meta.env.VITE_HERO_VIMEO_ID || undefined,
     
     // Option 3: Use local video (will be optimized for Cloudflare)
-    videoUrl: import.meta.env.VITE_HERO_VIDEO_URL || "/hero-cloudflare.mp4",
+    videoUrl: import.meta.env.VITE_HERO_VIDEO_URL || undefined, // Removed default video file
     
     // Poster image
     posterUrl: hero?.posterUrl || heroImage
