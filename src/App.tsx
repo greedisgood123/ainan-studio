@@ -12,33 +12,8 @@ import { PackagesPage } from "./pages/packages-page";
 import AdminLogin from "./pages/admin/Login";
 import AdminDashboard from "./pages/admin/Dashboard";
 import MobileTabBar from "@/components/ui/mobile-tabbar";
-import { apiClient, api } from "@/lib/api";
 
 const queryClient = new QueryClient();
-
-const Tracking = () => {
-  // Track initial load and hash changes with local backend
-  React.useEffect(() => {
-    const send = async () => {
-      try {
-        await apiClient.post(api.analytics.track, {
-          type: "pageview",
-          path: window.location.pathname + window.location.hash,
-          userAgent: navigator.userAgent,
-          referrer: document.referrer || undefined,
-        });
-      } catch (error) {
-        // Silently fail if analytics can't be sent
-        console.debug('Analytics tracking failed:', error);
-      }
-    };
-    send();
-    const onHash = () => send();
-    window.addEventListener("hashchange", onHash);
-    return () => window.removeEventListener("hashchange", onHash);
-  }, []);
-  return null;
-};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -46,7 +21,6 @@ const App = () => (
       <Toaster />
       <Sonner />
       <HashRouter>
-        <Tracking />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/portfolio" element={<PortfolioPage />} />
