@@ -2,7 +2,18 @@ import React, { useMemo, useState, useRef } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Play, Camera, Zap, Eye, Heart, ArrowRight, ArrowLeft } from "lucide-react";
 import { ToPortfolioButton } from "@/components/ui/to-portfolio-button";
-import galleryImages from "@/assets/imagesCarousel";
+
+// Import images directly
+import image1 from "@/assets/imagesCarousel/20191208-LAN_0281.webp";
+import image2 from "@/assets/imagesCarousel/AIN00523.webp";
+import image3 from "@/assets/imagesCarousel/AIN00718.webp";
+import image4 from "@/assets/imagesCarousel/Amin-Rashidi-Studio-664.webp";
+import image5 from "@/assets/imagesCarousel/DSC_3411.webp";
+import image6 from "@/assets/imagesCarousel/FKP03731.webp";
+import image7 from "@/assets/imagesCarousel/FKP03833.webp";
+import image8 from "@/assets/imagesCarousel/FKP03935.webp";
+import image9 from "@/assets/imagesCarousel/0FK_1526.webp";
+import image10 from "@/assets/imagesCarousel/0FK_0696.webp";
 
 export interface GalleryItem {
   title: string;
@@ -168,42 +179,42 @@ export const Gallery = () => {
       description: "Multi-camera setup for 1,000+ attendees with real-time streaming", 
       badge: "Livefeed", 
       iconName: "Play",
-      imageUrl: galleryImages[9] // 0FK_0696.webp
+      imageUrl: image10 // 0FK_0696.webp
     },
     { 
       title: "Corporate Headshot Session", 
       description: "Professional headshots for 50+ executives in a single day", 
       badge: "Photography", 
       iconName: "Camera",
-      imageUrl: galleryImages[1] // AIN00523.webp
+      imageUrl: image2 // AIN00523.webp
     },
     { 
       title: "Wedding Live Coverage", 
       description: "Complete ceremony and reception with cinematic highlights", 
       badge: "Event Coverage", 
       iconName: "Zap",
-      imageUrl: galleryImages[5] // FKP03731.webp
+      imageUrl: image6 // FKP03731.webp
     },
     { 
       title: "Product Launch Event", 
       description: "High-end product photography and live streaming for brand launch", 
       badge: "Commercial", 
       iconName: "Camera",
-      imageUrl: galleryImages[2] // AIN00718.webp
+      imageUrl: image3 // AIN00718.webp
     },
     { 
       title: "Corporate Training Session", 
       description: "Multi-location training session with interactive Q&A", 
       badge: "Education", 
       iconName: "Play",
-      imageUrl: galleryImages[4] // DSC_3411.webp
+      imageUrl: image5 // DSC_3411.webp
     },
     { 
       title: "Award Ceremony Coverage", 
       description: "Red carpet photography and live award ceremony streaming", 
       badge: "Events", 
       iconName: "Zap",
-      imageUrl: galleryImages[6] // FKP03833.webp
+      imageUrl: image7 // FKP03833.webp
     },
   ];
 
