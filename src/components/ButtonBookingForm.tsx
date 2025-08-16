@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -29,35 +29,18 @@ interface ButtonBookingFormProps {
 export const ButtonBookingForm = ({ packageName, isOpen, onClose }: ButtonBookingFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitMessage, setSubmitMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
-  const [unavailableDays, setUnavailableDays] = useState<number[]>([])
-
-  // Fetch unavailable dates from backend
-  useEffect(() => {
-    const fetchUnavailableDates = async () => {
-      try {
-        const response = await apiClient.get('/api/bookings/unavailable-dates')
-        const data = await response.json()
-        const unavailableDatesMs = data.map((item: any) => item.dateMs || item.date_ms)
-        setUnavailableDays(unavailableDatesMs)
-      } catch (error) {
-        console.error('Failed to fetch unavailable dates:', error)
-        // Fallback to static dates if backend is unavailable
-        setUnavailableDays([
-          // Next 2 weekends
-          new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 7).getTime(), // Next Saturday
-          new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 8).getTime(), // Next Sunday
-          new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 14).getTime(), // Following Saturday
-          new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 15).getTime(), // Following Sunday
-          // Some weekdays for demo
-          new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 3).getTime(), // 3 days from now
-          new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 10).getTime(), // 10 days from now
-        ])
-      }
-    }
-    if (isOpen) {
-      fetchUnavailableDates()
-    }
-  }, [isOpen])
+  
+  // Static unavailable dates - no backend needed for calendar
+  const staticUnavailableDays = [
+    // Next 2 weekends
+    new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 7).getTime(), // Next Saturday
+    new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 8).getTime(), // Next Sunday
+    new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 14).getTime(), // Following Saturday
+    new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 15).getTime(), // Following Sunday
+    // Some weekdays for demo
+    new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 3).getTime(), // 3 days from now
+    new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 10).getTime(), // 10 days from now
+  ]
 
   const {
     register,
@@ -73,7 +56,7 @@ export const ButtonBookingForm = ({ packageName, isOpen, onClose }: ButtonBookin
   const isDateBlocked = (d?: Date) => {
     if (!d) return false
     const start = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()
-    return unavailableDays.includes(start)
+    return staticUnavailableDays.includes(start)
   }
 
   const onSubmit = async (data: BookingFormData) => {
