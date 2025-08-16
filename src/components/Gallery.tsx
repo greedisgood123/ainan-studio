@@ -1,7 +1,5 @@
 import { Play, Camera, Zap, ArrowRight, ArrowLeft, Eye, Heart } from "lucide-react";
 import { ToPortfolioButton } from "@/components/ui/to-portfolio-button";
-import { useQuery } from "convex/react";
-import { api } from "../../convex/_generated/api";
 import React, { useMemo, useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 
@@ -169,7 +167,22 @@ const CreativeGalleryTile = ({
 };
 
 export const Gallery = () => {
-  const data = useQuery(api.gallery.listPublic, {});
+  // Use local backend instead of Convex
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('http://localhost:3001/api/gallery/public')
+      .then(res => res.json())
+      .then(galleryData => {
+        setData(galleryData);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Failed to fetch gallery:', err);
+        setLoading(false);
+      });
+  }, []);
   const iconMap: Record<string, any> = { Play, Camera, Zap };
   const [currentIndex, setCurrentIndex] = useState<number | null>(null);
   const fallback = [
@@ -180,15 +193,17 @@ export const Gallery = () => {
 
   const items = useMemo<GalleryItem[]>(() => {
     try {
-      const source = data && data.length > 0 ? data : fallback;
+      // Use data from local backend or fallback
+      const source = (data && Array.isArray(data) && data.length > 0) ? data : fallback;
       return source.map((i: any) => ({
         title: i.title,
         description: i.description,
         badge: i.badge,
         Icon: iconMap[i.iconName] || Play,
-        imageUrl: i.imageUrl, // server returns signed url when available
+        imageUrl: i.imageUrl || undefined, // local backend provides direct URLs
       }));
     } catch (err) {
+      console.error('Error processing gallery data:', err);
       // Fallback to static items on any unexpected error
       return fallback.map((i: any) => ({
         title: i.title,

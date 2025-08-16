@@ -1,189 +1,213 @@
-import { useEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { useMutation, useQuery } from "convex/react";
-import { api } from "../../../convex/_generated/api";
+import { useEffect } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./styled/app-sidebar";
 import { AdminDashboard } from "./styled/admin-dashboard";
+import { CleanupDashboard } from "./CleanupDashboard";
+import { useAuth } from "@/lib/auth";
+
+// Import the new admin API hooks
+import {
+  useAdminProfile,
+  useClientLogos,
+  useCreateClientLogo,
+  useUpdateClientLogo,
+  useDeleteClientLogo,
+  usePortfolioAdmin,
+  useCreatePortfolioAlbum,
+  useUpdatePortfolioAlbum,
+  useDeletePortfolioAlbum,
+  useAddPortfolioPhoto,
+  usePackagesAdmin,
+  useCreatePackage,
+  useUpdatePackage,
+  useDeletePackage,
+  useBookingsAdmin,
+  useUnavailableDates,
+  useBlockDate,
+  useUnblockDate,
+  useGalleryAdmin,
+  useCreateGalleryItem,
+  useUpdateGalleryItem,
+  useDeleteGalleryItem,
+  useSetHeroVideo,
+  useFileUploadWithProgress,
+} from "@/hooks/useAdminApi";
+
+// Type imports (keeping the same interfaces)
 import type { PortfolioItem as StyledPortfolioItem, CreatePortfolioPayload as CreatePortfolioPayloadStyled, UpdatePortfolioPayload as UpdatePortfolioPayloadStyled } from "./styled/sections/portfolio-section";
 import type { LogoItem as StyledLogoItem, CreateLogoPayload as CreateLogoPayloadStyled, UpdateLogoPayload as UpdateLogoPayloadStyled } from "./styled/sections/logos-section";
 import type { GalleryItem as StyledGalleryItem, CreateGalleryPayload as CreateGalleryPayloadStyled, UpdateGalleryPayload as UpdateGalleryPayloadStyled } from "./styled/sections/gallery-section";
 import type { BookingItem as StyledBookingItem, UnavailableDate as StyledUnavailableDate } from "./styled/sections/bookings-section";
 import type { PackageItem as StyledPackageItem, CreatePackagePayload as CreatePackagePayloadStyled, UpdatePackagePayload as UpdatePackagePayloadStyled } from "./styled/sections/packages-section";
-import type { Id } from "../../../convex/_generated/dataModel";
 
 const Dashboard = () => {
-  const token = typeof window !== 'undefined' ? localStorage.getItem("admin_token") : null;
-  const me = useQuery(api.auth.me, token ? { token } : "skip");
-  const logos = useQuery(api.clientLogos.list, {});
-  const bookings = useQuery(api.bookings.listAdmin, token ? { token } : "skip");
-  const unavailable = useQuery(api.unavailableDates.list, token ? { token } : "skip");
-  const createLogo = useMutation(api.clientLogos.create);
-  const updateLogo = useMutation(api.clientLogos.update);
-  const removeLogo = useMutation(api.clientLogos.remove);
-  const getUploadUrl = useMutation(api.files.getUploadUrl);
-  const portfolio = useQuery(api.portfolio.listAdmin, token ? { token } : "skip");
-  const createAlbum = useMutation(api.portfolio.createAlbum);
-  const updateAlbum = useMutation(api.portfolio.updateAlbum);
-  const removeAlbum = useMutation(api.portfolio.removeAlbum);
-  const addPhoto = useMutation(api.portfolio.addPhoto);
-  const blockDate = useMutation(api.unavailableDates.block);
-  const unblockDate = useMutation(api.unavailableDates.unblock);
-  const packages = useQuery(api.packages.listAdmin, token ? { token } : "skip");
-  const createPackage = useMutation(api.packages.create);
-  const updatePackage = useMutation(api.packages.update);
-  const removePackage = useMutation(api.packages.remove);
-  const setHeroVideo = useMutation(api.siteSettings.setHeroVideo);
+  const { isAuthenticated, logout } = useAuth();
+  
+  // Admin profile
+  const { data: me } = useAdminProfile();
+  
+  // Data queries
+  const { data: logos, refetch: refetchLogos } = useClientLogos();
+  const { data: portfolio, refetch: refetchPortfolio } = usePortfolioAdmin();
+  const { data: packages, refetch: refetchPackages } = usePackagesAdmin();
+  const { data: bookings, refetch: refetchBookings } = useBookingsAdmin();
+  const { data: unavailable, refetch: refetchUnavailable } = useUnavailableDates();
+  const { data: galleryData, refetch: refetchGallery } = useGalleryAdmin();
+  
+  // Mutations
+  const createLogo = useCreateClientLogo();
+  const updateLogo = useUpdateClientLogo();
+  const removeLogo = useDeleteClientLogo();
+  const createAlbum = useCreatePortfolioAlbum();
+  const updateAlbum = useUpdatePortfolioAlbum();
+  const removeAlbum = useDeletePortfolioAlbum();
+  const addPhoto = useAddPortfolioPhoto();
+  const createPackage = useCreatePackage();
+  const updatePackage = useUpdatePackage();
+  const removePackage = useDeletePackage();
+  const blockDate = useBlockDate();
+  const unblockDate = useUnblockDate();
+  const createGalleryItem = useCreateGalleryItem();
+  const updateGalleryItem = useUpdateGalleryItem();
+  const removeGalleryItem = useDeleteGalleryItem();
+  const setHeroVideo = useSetHeroVideo();
+  
+  // File upload utility
+  const { uploadFile, progress } = useFileUploadWithProgress();
 
-  const [newName, setNewName] = useState("");
-  const [newOrder, setNewOrder] = useState<number>(0);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const galleryFileInputRef = useRef<HTMLInputElement | null>(null);
-  const [newCategory, setNewCategory] = useState<string>("Livefeed");
-  const categories = ["Weddings", "Corporate", "Livefeed"] as const;
+  // These can be removed as they're not used in the new implementation
+  // const [newName, setNewName] = useState("");
+  // const [newOrder, setNewOrder] = useState<number>(0);
+  // const fileInputRef = useRef<HTMLInputElement | null>(null);
+  // const galleryFileInputRef = useRef<HTMLInputElement | null>(null);
+  // const [newCategory, setNewCategory] = useState<string>("Livefeed");
+  // const categories = ["Weddings", "Corporate", "Livefeed"] as const;
 
+  // Redirect if not authenticated
   useEffect(() => {
-    if (me === null) {
+    if (!isAuthenticated) {
       window.location.hash = "#/admin/login";
     }
-  }, [me]);
+  }, [isAuthenticated]);
 
-  if (me === undefined) return null; // loading
-  if (me === null) return null; // redirected
+  if (!isAuthenticated || !me) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
-  const handleCreate = async () => {
-    if (!fileInputRef.current?.files?.[0]) return;
-    const file = fileInputRef.current.files[0];
-    const { uploadUrl } = await getUploadUrl({ token: token! });
-    const res = await fetch(uploadUrl, {
-      method: "POST",
-      headers: { "Content-Type": file.type },
-      body: file,
-    });
-    const { storageId } = await res.json();
-    await createLogo({ token: token!, name: newName || file.name, logoStorageId: storageId, order: Number(newOrder) || 0 });
-    setNewName("");
-    setNewOrder(0);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
-
-  // Map data to styled components' types
-  const portfolioData: StyledPortfolioItem[] = (portfolio || []).map((p: any) => ({
-    _id: p._id,
+  // Transform data for styled components
+  const portfolioData: StyledPortfolioItem[] = (Array.isArray(portfolio) ? portfolio : []).map((p: any) => ({
+    _id: p.id?.toString() || p._id,
     title: p.title,
     description: p.description,
     category: p.category,
-    coverUrl: p.coverUrl ?? (p.coverImageStorageId ? `/_storage/${p.coverImageStorageId}` : undefined),
-    order: p.order,
-    isPublished: p.isPublished,
+    coverUrl: p.coverImageUrl || p.cover_image_url,
+    order: p.orderIndex || p.order_index || p.order || 0,
+    isPublished: p.isPublished || p.is_published,
   }));
 
-  const logosData: StyledLogoItem[] = (logos || []).map((l: any) => ({
-    _id: l._id,
+  const logosData: StyledLogoItem[] = (Array.isArray(logos) ? logos : []).map((l: any) => ({
+    _id: l.id?.toString() || l._id,
     name: l.name,
-    logoUrl: l.logoStorageId ? `/_storage/${l.logoStorageId}` : undefined,
-    order: l.order,
+    logoUrl: l.logoUrl || l.logo_url,
+    order: l.orderIndex || l.order_index || l.order || 0,
   }));
 
-
-  const bookingsData: StyledBookingItem[] = (bookings || []).map((b: any) => ({
-    _id: b._id,
+  const bookingsData: StyledBookingItem[] = (Array.isArray(bookings) ? bookings : []).map((b: any) => ({
+    _id: b.id?.toString() || b._id,
     name: b.name,
     email: b.email,
     phone: b.phone,
-    desiredDateMs: b.desiredDateMs,
-    packageName: b.packageName,
+    desiredDateMs: b.desiredDateMs || b.desired_date,
+    packageName: b.packageName || b.package_name,
     status: b.status,
-    createdAt: b.createdAt,
+    createdAt: b.createdAt || b.created_at,
   }));
 
-  const unavailableData: StyledUnavailableDate[] = (unavailable || []).map((u: any) => ({
-    _id: u._id,
-    dateMs: u.dateMs,
+  const unavailableData: StyledUnavailableDate[] = (Array.isArray(unavailable) ? unavailable : []).map((u: any) => ({
+    _id: u.id?.toString() || u._id,
+    dateMs: u.dateMs || u.date_ms,
     reason: u.reason,
   }));
 
-  const packagesData: StyledPackageItem[] = (packages || []).map((p: any) => ({
-    _id: p._id,
+  const packagesData: StyledPackageItem[] = (Array.isArray(packages) ? packages : []).map((p: any) => ({
+    _id: p.id?.toString() || p._id,
     title: p.title,
     price: p.price,
     description: p.description,
-    features: p.features,
-    addOns: p.addOns,
-    isPopular: p.isPopular,
+    features: Array.isArray(p.features) ? p.features : JSON.parse(p.features || '[]'),
+    addOns: Array.isArray(p.addOns) ? p.addOns : (Array.isArray(p.add_ons) ? p.add_ons : JSON.parse(p.add_ons || '[]')),
+    isPopular: p.isPopular || p.is_popular,
     badge: p.badge,
-    order: p.order,
-    isPublished: p.isPublished,
+    order: p.orderIndex || p.order_index || p.order || 0,
+    isPublished: p.isPublished || p.is_published,
   }));
 
+  const galleryItems: StyledGalleryItem[] = (Array.isArray(galleryData) ? galleryData : []).map((g: any) => ({
+    _id: g.id?.toString() || g._id,
+    title: g.title,
+    description: g.description,
+    badge: g.badge,
+    iconName: g.iconName || g.icon_name,
+    imageUrl: g.imageUrl || g.image_url,
+    order: g.orderIndex || g.order_index || g.order || 0,
+    isPublished: g.isPublished || g.is_published,
+  }));
+
+  // Portfolio actions
   const portfolioActions = {
     onCreate: async (payload: CreatePortfolioPayloadStyled) => {
-      const file = payload.file;
-      let storageId: string | undefined = undefined;
-      if (file) {
-        const { uploadUrl } = await getUploadUrl({ token: token! });
-        const res = await fetch(uploadUrl, { method: 'POST', headers: { 'Content-Type': file.type }, body: file });
-        const json = await res.json();
-        storageId = json.storageId;
+      try {
+        await createAlbum.mutate({
+          title: payload.title,
+          description: payload.description,
+          category: payload.category,
+          file: payload.file,
+          order: payload.order ?? 0,
+          isPublished: payload.isPublished ?? true,
+        });
+        refetchPortfolio();
+      } catch (error) {
+        console.error('Failed to create portfolio album:', error);
       }
-      await createAlbum({
-        token: token!,
-        title: payload.title,
-        description: payload.description,
-        category: payload.category,
-        coverImageStorageId: storageId as Id<'_storage'> | undefined,
-        order: payload.order ?? 0,
-        isPublished: payload.isPublished ?? true,
-      });
     },
     onUpdate: async (update: UpdatePortfolioPayloadStyled) => {
-      if ((update as any).file) {
-        const file = (update as any).file as File;
-        const { uploadUrl } = await getUploadUrl({ token: token! });
-        const res = await fetch(uploadUrl, { method: 'POST', headers: { 'Content-Type': file.type }, body: file });
-        const json = await res.json();
-        await updateAlbum({ token: token!, id: update.id as Id<'portfolio_albums'>, coverImageStorageId: json.storageId as Id<'_storage'> });
-      }
-      const { id, file: _f, ...rest } = update as any;
-      if (Object.keys(rest).length > 0) {
-        await updateAlbum({ token: token!, id: id as Id<'portfolio_albums'>, ...(rest as any) });
+      try {
+        await updateAlbum.mutate({
+          id: update.id,
+          title: (update as any).title,
+          description: (update as any).description,
+          category: (update as any).category,
+          file: (update as any).file,
+          order: (update as any).order,
+          isPublished: (update as any).isPublished,
+        });
+        refetchPortfolio();
+      } catch (error) {
+        console.error('Failed to update portfolio album:', error);
       }
     },
     onDelete: async (id: string) => {
-      await removeAlbum({ token: token!, id: id as Id<'portfolio_albums'> });
+      try {
+        await removeAlbum.mutate(id);
+        refetchPortfolio();
+      } catch (error) {
+        console.error('Failed to delete portfolio album:', error);
+      }
     },
     isLoading: portfolio === undefined,
     uploadToStorage: async (file: File | Blob, onProgress?: (pct: number) => void) => {
-      const { uploadUrl } = await getUploadUrl({ token: token! });
-      return await new Promise<string>((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open("POST", uploadUrl);
-        xhr.setRequestHeader("Content-Type", (file as Blob).type || "application/octet-stream");
-        if (xhr.upload && onProgress) {
-          xhr.upload.onprogress = (evt) => {
-            if (evt.lengthComputable) {
-              const pct = Math.round((evt.loaded / evt.total) * 100);
-              onProgress(pct);
-            }
-          };
-        }
-        xhr.onerror = () => reject(new Error("Upload failed"));
-        xhr.onload = () => {
-          try {
-            const json = JSON.parse(xhr.responseText);
-            resolve(json.storageId as string);
-          } catch (e) {
-            reject(e);
-          }
-        };
-        xhr.send(file);
-      });
+      try {
+        const result = await uploadFile(file as File, 'portfolio');
+        return (result as any).url || result;
+      } catch (error) {
+        console.error('Failed to upload file:', error);
+        throw error;
+      }
     },
     createFromStorage: async (meta: {
       title: string;
@@ -193,95 +217,164 @@ const Dashboard = () => {
       order?: number;
       isPublished?: boolean;
     }) => {
-      // kept for compatibility if needed
+      // Implementation if needed
     },
-    addPhotoToAlbum: async (albumId: string, storageId: string, order: number) => {
-      await addPhoto({ token: token!, albumId: albumId as Id<'portfolio_albums'>, imageStorageId: storageId as Id<'_storage'>, order });
+    addPhotoToAlbum: async (albumId: string, file: File, order: number) => {
+      try {
+        await addPhoto.mutate({
+          albumId,
+          file,
+          order,
+        });
+        refetchPortfolio();
+      } catch (error) {
+        console.error('Failed to add photo to album:', error);
+      }
     },
   };
 
+  // Logo actions
   const logoActions = {
     onCreate: async (payload: CreateLogoPayloadStyled) => {
-      const file = payload.file;
-      if (!file) return;
-      const { uploadUrl } = await getUploadUrl({ token: token! });
-      const res = await fetch(uploadUrl, { method: 'POST', headers: { 'Content-Type': file.type }, body: file });
-      const json = await res.json();
-      await createLogo({ token: token!, name: payload.name, logoStorageId: json.storageId as Id<"_storage">, order: payload.order ?? 0 });
+      try {
+        await createLogo.mutate({
+          name: payload.name,
+          file: payload.file,
+          order: payload.order ?? 0,
+        });
+        refetchLogos();
+      } catch (error) {
+        console.error('Failed to create logo:', error);
+      }
     },
     onUpdate: async (update: UpdateLogoPayloadStyled) => {
-      if ((update as any).file) {
-        const file = (update as any).file as File;
-        const { uploadUrl } = await getUploadUrl({ token: token! });
-        const res = await fetch(uploadUrl, { method: 'POST', headers: { 'Content-Type': file.type }, body: file });
-        const json = await res.json();
-        await updateLogo({ token: token!, id: update.id as Id<"client_logos">, logoStorageId: json.storageId as Id<"_storage"> });
-      }
-      const { id, file: _f, ...rest } = update as any;
-      if (Object.keys(rest).length > 0) {
-        await updateLogo({ token: token!, id: id as Id<"client_logos">, ...(rest as any) });
+      try {
+        await updateLogo.mutate({
+          id: update.id,
+          name: (update as any).name,
+          file: (update as any).file,
+          order: (update as any).order,
+        });
+        refetchLogos();
+      } catch (error) {
+        console.error('Failed to update logo:', error);
       }
     },
     onDelete: async (id: string) => {
-      await removeLogo({ token: token!, id: id as Id<"client_logos"> });
+      try {
+        await removeLogo.mutate(id);
+        refetchLogos();
+      } catch (error) {
+        console.error('Failed to delete logo:', error);
+      }
     },
     isLoading: logos === undefined,
   };
 
+  // Gallery actions
+  const galleryActions = {
+    onCreate: async (payload: CreateGalleryPayloadStyled) => {
+      try {
+        await createGalleryItem.mutate({
+          title: payload.title,
+          description: payload.description,
+          badge: payload.badge || 'Service',
+          iconName: payload.iconName || 'Camera',
+          file: payload.file,
+          order: payload.order ?? 0,
+          isPublished: payload.isPublished ?? true,
+        });
+        refetchGallery();
+      } catch (error) {
+        console.error('Failed to create gallery item:', error);
+      }
+    },
+    onUpdate: async (update: UpdateGalleryPayloadStyled) => {
+      try {
+        await updateGalleryItem.mutate({
+          id: update.id,
+          title: (update as any).title,
+          description: (update as any).description,
+          badge: (update as any).badge,
+          iconName: (update as any).iconName,
+          file: (update as any).file,
+          order: (update as any).order,
+          isPublished: (update as any).isPublished,
+        });
+        refetchGallery();
+      } catch (error) {
+        console.error('Failed to update gallery item:', error);
+      }
+    },
+    onDelete: async (id: string) => {
+      try {
+        await removeGalleryItem.mutate(id);
+        refetchGallery();
+      } catch (error) {
+        console.error('Failed to delete gallery item:', error);
+      }
+    },
+    isLoading: galleryData === undefined,
+  };
 
+  // Booking actions
   const bookingsActions = {
     onBlock: async (dateMs: number, reason?: string) => {
-      await blockDate({ token: token!, dateMs, reason });
+      try {
+        await blockDate.mutate({ dateMs, reason });
+        refetchUnavailable();
+      } catch (error) {
+        console.error('Failed to block date:', error);
+      }
     },
     onUnblock: async (dateMs: number) => {
-      await unblockDate({ token: token!, dateMs });
+      try {
+        await unblockDate.mutate(dateMs);
+        refetchUnavailable();
+      } catch (error) {
+        console.error('Failed to unblock date:', error);
+      }
     },
     isLoading: bookings === undefined || unavailable === undefined,
   };
 
+  // Package actions
   const packagesActions = {
     onCreate: async (payload: CreatePackagePayloadStyled) => {
-      await createPackage({ token: token!, ...payload });
+      try {
+        await createPackage.mutate(payload);
+        refetchPackages();
+      } catch (error) {
+        console.error('Failed to create package:', error);
+      }
     },
     onUpdate: async (update: UpdatePackagePayloadStyled) => {
-      const { id, ...rest } = update as any;
-      if (Object.keys(rest).length > 0) {
-        await updatePackage({ token: token!, id: id as any, ...(rest as any) });
+      try {
+        await updatePackage.mutate(update);
+        refetchPackages();
+      } catch (error) {
+        console.error('Failed to update package:', error);
       }
     },
     onDelete: async (id: string) => {
-      await removePackage({ token: token!, id: id as any });
+      try {
+        await removePackage.mutate(id);
+        refetchPackages();
+      } catch (error) {
+        console.error('Failed to delete package:', error);
+      }
     },
     isLoading: packages === undefined,
   };
 
+  // Settings actions
   const settingsActions = {
     onSetHero: async (payload: { mp4?: File; webm?: File; poster?: File }) => {
-      const uploads: { mp4StorageId?: string; webmStorageId?: string; posterStorageId?: string } = {};
       try {
-        if (payload.mp4) {
-          const { uploadUrl } = await getUploadUrl({ token: token! });
-          const res = await fetch(uploadUrl, { method: 'POST', headers: { 'Content-Type': payload.mp4.type }, body: payload.mp4 });
-          const json = await res.json();
-          uploads.mp4StorageId = json.storageId as string;
-        }
-        if (payload.webm) {
-          const { uploadUrl } = await getUploadUrl({ token: token! });
-          const res = await fetch(uploadUrl, { method: 'POST', headers: { 'Content-Type': payload.webm.type }, body: payload.webm });
-          const json = await res.json();
-          uploads.webmStorageId = json.storageId as string;
-        }
-        if (payload.poster) {
-          const { uploadUrl } = await getUploadUrl({ token: token! });
-          const res = await fetch(uploadUrl, { method: 'POST', headers: { 'Content-Type': payload.poster.type }, body: payload.poster });
-          const json = await res.json();
-          uploads.posterStorageId = json.storageId as string;
-        }
-        await setHeroVideo({ token: token!, ...(uploads as any) });
-      } catch (err) {
-        // swallow to avoid crashing the dashboard, surface via console for now
-        console.error('Failed to set hero media:', err);
-        throw err;
+        await setHeroVideo.mutate(payload);
+        // Optionally show success message
+      } catch (error) {
+        console.error('Failed to set hero video:', error);
       }
     },
   };
@@ -297,19 +390,34 @@ const Dashboard = () => {
               <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">Admin Dashboard</h1>
             </div>
           </div>
-          <AdminDashboard
-            portfolio={portfolioData}
-            logos={logosData}
-            bookings={bookingsData}
-            unavailable={unavailableData}
-            packages={packagesData}
-            portfolioActions={portfolioActions}
-            logoActions={logoActions}
-            bookingsActions={bookingsActions}
-            packagesActions={packagesActions}
-            settingsActions={settingsActions}
-            onLogout={() => { localStorage.removeItem("admin_token"); window.location.hash = "#/admin/login"; }}
-          />
+          <Tabs defaultValue="dashboard" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+              <TabsTrigger value="cleanup">Cleanup & Optimization</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="dashboard">
+              <AdminDashboard
+                portfolio={portfolioData}
+                logos={logosData}
+                gallery={galleryItems}
+                bookings={bookingsData}
+                unavailable={unavailableData}
+                packages={packagesData}
+                portfolioActions={portfolioActions}
+                logoActions={logoActions}
+                galleryActions={galleryActions}
+                bookingsActions={bookingsActions}
+                packagesActions={packagesActions}
+                settingsActions={settingsActions}
+                onLogout={logout}
+              />
+            </TabsContent>
+            
+            <TabsContent value="cleanup">
+              <CleanupDashboard adminToken="" />
+            </TabsContent>
+          </Tabs>
         </div>
       </SidebarInset>
     </SidebarProvider>

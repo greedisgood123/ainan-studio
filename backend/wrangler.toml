@@ -1,0 +1,13 @@
+name = "ainan-studio-backend"
+main = "server-workers.js"
+compatibility_date = "2024-01-01"
+
+[env.production]
+name = "ainan-studio-backend-prod"
+
+# Environment variables
+[vars]
+JWT_SECRET = "your-super-secret-jwt-key-here"
+ADMIN_EMAIL = "admin@ainanstudio.com"
+ADMIN_PASSWORD = "your-secure-password"
+NODE_ENV = "production"

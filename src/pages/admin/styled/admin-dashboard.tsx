@@ -12,6 +12,10 @@ import {
   type UpdatePortfolioPayload,
 } from "./sections/portfolio-section"
 import { LogosSection, type LogoItem, type CreateLogoPayload, type UpdateLogoPayload } from "./sections/logos-section"
+import { GallerySection, type GalleryItem, type CreateGalleryPayload, type UpdateGalleryPayload } from "./sections/gallery-section"
+
+// Re-export types for convenience
+export type { GalleryItem, CreateGalleryPayload, UpdateGalleryPayload }
 import { BookingsSection, type BookingItem, type UnavailableDate } from "./sections/bookings-section"
 import { PackagesSection, type PackageItem, type CreatePackagePayload, type UpdatePackagePayload } from "./sections/packages-section"
 import { SettingsSection } from "@/pages/admin/styled/sections/settings-section"
@@ -19,18 +23,21 @@ import { SettingsSection } from "@/pages/admin/styled/sections/settings-section"
 export function AdminDashboard({
   portfolio,
   logos,
+  gallery,
   bookings,
   unavailable,
   packages,
   settingsActions,
   portfolioActions,
   logoActions,
+  galleryActions,
   bookingsActions,
   packagesActions,
   onLogout,
 }: {
   portfolio: PortfolioItem[]
   logos: LogoItem[]
+  gallery: GalleryItem[]
   bookings: BookingItem[]
   unavailable: UnavailableDate[]
   packages: PackageItem[]
@@ -47,6 +54,12 @@ export function AdminDashboard({
   logoActions: {
     onCreate: (payload: CreateLogoPayload) => Promise<void>
     onUpdate: (payload: UpdateLogoPayload) => Promise<void>
+    onDelete: (id: string) => Promise<void>
+    isLoading?: boolean
+  }
+  galleryActions: {
+    onCreate: (payload: CreateGalleryPayload) => Promise<void>
+    onUpdate: (payload: UpdateGalleryPayload) => Promise<void>
     onDelete: (id: string) => Promise<void>
     isLoading?: boolean
   }
@@ -95,6 +108,9 @@ export function AdminDashboard({
           <TabsTrigger value="portfolio" id="portfolio">
             Portfolio
           </TabsTrigger>
+          <TabsTrigger value="gallery" id="gallery">
+            Gallery
+          </TabsTrigger>
           <TabsTrigger value="logos" id="logos">
             Client Logos
           </TabsTrigger>
@@ -111,6 +127,10 @@ export function AdminDashboard({
 
         <TabsContent value="portfolio">
           <PortfolioSection data={portfolio} {...portfolioActions} />
+        </TabsContent>
+
+        <TabsContent value="gallery">
+          <GallerySection data={gallery} {...galleryActions} />
         </TabsContent>
 
         <TabsContent value="logos">

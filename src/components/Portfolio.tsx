@@ -2,35 +2,37 @@ import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { useQuery } from "convex/react";
-import { api } from "../../convex/_generated/api";
+import { usePortfolioPublic } from "@/hooks/useApi";
 
 
 export const Portfolio = () => {
   const [activeFilter, setActiveFilter] = useState("All");
   const filters = ["All", "Weddings", "Corporate", "Livefeed"];
-  const albums = useQuery(api.portfolio.listPublic, {
-    category: activeFilter === "All" ? undefined : activeFilter,
-  });
+  const { data: albums, loading } = usePortfolioPublic();
   const items = useMemo(
-    () =>
-      (albums ?? []).map((i: any) => ({
-        id: i._id,
+    () => {
+      const allItems = (albums ?? []).map((i: any) => ({
+        id: i.id || i._id,
         title: i.title,
         description: i.description,
         category: i.category,
-        coverUrl: i.coverUrl as string | undefined,
-      })),
-    [albums]
+        coverUrl: (i.coverImageUrl || i.coverUrl) as string | undefined,
+      }));
+      
+      // Filter by category if not "All"
+      if (activeFilter === "All") {
+        return allItems;
+      }
+      return allItems.filter(item => item.category === activeFilter);
+    },
+    [albums, activeFilter]
   );
 
-  // Lightbox state
+  // Lightbox state (temporarily disabled during migration)
   const [activeAlbumId, setActiveAlbumId] = useState<string | null>(null);
   const [lightboxIndex, setLightboxIndex] = useState<number>(0);
-  const photos = useQuery(
-    api.portfolio.listAlbumPhotos as any,
-    activeAlbumId ? ({ albumId: activeAlbumId } as any) : ("skip" as any)
-  ) as any[] | undefined;
+  // TODO: Implement album photos API call
+  const photos: any[] | undefined = undefined;
   const isLightboxOpen = activeAlbumId !== null;
 
   useEffect(() => {

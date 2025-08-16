@@ -4,13 +4,28 @@ import { Camera, MapPin, Clock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { AssistantChat } from "./ui/assistant-chat";
 import heroImage from "@/assets/hero-image.webp";
-import { useQuery } from "convex/react";
-import { api } from "../../convex/_generated/api";
+import { useState, useEffect } from "react";
+import { apiClient } from "@/lib/api";
 import React from "react";
 
 export const Hero = () => {
   const navigate = useNavigate();
-  const hero = useQuery(api.siteSettings.getHero, {});
+  const [hero, setHero] = useState<any>(null);
+
+  // Fetch hero settings from local backend
+  useEffect(() => {
+    const fetchHeroSettings = async () => {
+      try {
+        const response = await apiClient.get('http://localhost:3001/api/site-settings');
+        const data = await response.json();
+        setHero(data);
+      } catch (error) {
+        console.debug('Failed to fetch hero settings:', error);
+        // Continue with fallback values
+      }
+    };
+    fetchHeroSettings();
+  }, []);
   const [videoReady, setVideoReady] = React.useState(false);
   const [videoError, setVideoError] = React.useState<string | null>(null);
   const [canAttemptVideo, setCanAttemptVideo] = React.useState<boolean>(false);
@@ -19,7 +34,7 @@ export const Hero = () => {
   const overrideMp4 = (import.meta.env.VITE_HERO_MP4_URL as string | undefined) || "/hero-optimized.mp4";
   const overrideWebm = (import.meta.env.VITE_HERO_WEBM_URL as string | undefined) || undefined;
   const overridePoster = (import.meta.env.VITE_HERO_POSTER_URL as string | undefined) || undefined;
-  // Prefer Convex-provided URLs first; fall back to env overrides (now using optimized video)
+  // Prefer backend-provided URLs first; fall back to env overrides (now using optimized video)
   const videoMp4 = (hero?.mp4Url as string | undefined) || overrideMp4;
   const videoWebm = (hero?.webmUrl as string | undefined) || overrideWebm;
   // Use bundled hero image as final fallback to avoid 404s in production

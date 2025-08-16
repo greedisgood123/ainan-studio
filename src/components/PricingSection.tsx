@@ -1,6 +1,6 @@
 import { PricingCard } from "@/components/PricingCard";
-import { useQuery } from "convex/react";
-import { api } from "../../convex/_generated/api";
+import { apiHelpers } from "@/lib/api";
+import { useState, useEffect } from "react";
 import {
   Carousel,
   CarouselContent,
@@ -11,7 +11,24 @@ import {
 import Autoplay from "embla-carousel-autoplay";
 
 export const PricingSection = () => {
-  const data = useQuery(api.packages.listPublic, {});
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPackages = async () => {
+      try {
+        const packages = await apiHelpers.handleResponse(
+          await fetch('http://localhost:3001/api/packages/public')
+        );
+        setData(packages);
+      } catch (error) {
+        console.error('Failed to fetch packages:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPackages();
+  }, []);
   const fallback = [
     {
       title: "Solo Headshot Session",

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -7,8 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { useMutation, useQuery } from 'convex/react'
-import { api } from '../../convex/_generated/api'
+import { apiClient } from '@/lib/api'
 import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
 import { Calendar } from '@/components/ui/calendar'
 
@@ -30,8 +29,25 @@ interface ButtonBookingFormProps {
 export const ButtonBookingForm = ({ packageName, isOpen, onClose }: ButtonBookingFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitMessage, setSubmitMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
-  const createBooking = useMutation(api.bookings.create)
-  const unavailableDays = useQuery(api.unavailableDates.publicDays, {})
+  const [unavailableDays, setUnavailableDays] = useState<number[]>([])
+
+  // Fetch unavailable dates
+  useEffect(() => {
+    const fetchUnavailableDates = async () => {
+      try {
+        const response = await apiClient.get('http://localhost:3001/api/bookings/unavailable-dates')
+        const data = await response.json()
+        const unavailableDatesMs = data.map((item: any) => item.dateMs || item.date_ms)
+        setUnavailableDays(unavailableDatesMs)
+      } catch (error) {
+        console.error('Failed to fetch unavailable dates:', error)
+        setUnavailableDays([])
+      }
+    }
+    if (isOpen) {
+      fetchUnavailableDates()
+    }
+  }, [isOpen])
 
   const {
     register,
@@ -72,7 +88,7 @@ export const ButtonBookingForm = ({ packageName, isOpen, onClose }: ButtonBookin
         return
       }
       const desiredDateMs = new Date(desired.getFullYear(), desired.getMonth(), desired.getDate()).getTime()
-      await createBooking({
+      await apiClient.post('http://localhost:3001/api/bookings', {
         name: data.name,
         email: data.email,
         phone: data.phone,

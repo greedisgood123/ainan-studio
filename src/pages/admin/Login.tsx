@@ -2,14 +2,13 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useMutation } from "convex/react";
-import { api } from "../../../convex/_generated/api";
+import { useAuth } from "@/lib/auth";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const login = useMutation(api.auth.login);
+  const { login, isLoading } = useAuth();
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6">
@@ -25,18 +24,18 @@ const Login = () => {
         {error && <p className="text-sm text-red-500">{error}</p>}
         <Button
           className="w-full"
+          disabled={isLoading}
           onClick={async () => {
             setError("");
-            try {
-              const res = await login({ email, password });
-              localStorage.setItem("admin_token", res.token);
+            const result = await login(email, password);
+            if (result.success) {
               window.location.hash = "#/admin";
-            } catch (e: any) {
-              setError(e?.message ?? "Login failed");
+            } else {
+              setError(result.error || "Login failed");
             }
           }}
         >
-          Log in
+          {isLoading ? "Logging in..." : "Log in"}
         </Button>
       </div>
     </div>

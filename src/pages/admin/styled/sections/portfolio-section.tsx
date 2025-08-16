@@ -1,8 +1,7 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { useQuery } from "convex/react"
-import { api } from "../../../../../convex/_generated/api"
+// Removed Convex imports - now using data passed from parent component
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -90,10 +89,9 @@ export function PortfolioSection({
   const [previews, setPreviews] = useState<{ file: File; url: string; progress: number }[]>([])
 
   // Photos of the selected album (admin view)
-  const albumPhotos = useQuery(
-    activeAlbumId ? (api.portfolio.listAlbumPhotos as any) : ("skip" as any),
-    activeAlbumId ? ({ albumId: activeAlbumId } as any) : ("skip" as any)
-  ) as any[] | undefined
+  // TODO: Implement album photos fetching with local backend
+  // For now, disable photo viewing during migration
+  const albumPhotos = null as any[] | undefined;
 
   const filenameToTitle = (name: string) => name.replace(/\.[^.]+$/, "").replace(/[\-_]+/g, " ").trim()
 
