@@ -5,12 +5,15 @@ import { AppSidebar } from "./styled/app-sidebar";
 import { AdminDashboard } from "./styled/admin-dashboard";
 import { CleanupDashboard } from "./CleanupDashboard";
 import { useAuth } from "@/lib/auth";
-import { useBookingsAdmin, useUnavailableDates } from "@/hooks/useAdminApi";
+import { useBookingsAdmin, useUnavailableDates, useAddUnavailableDate, useRemoveUnavailableDate } from "@/hooks/useAdminApi";
 
 const Dashboard = () => {
   const { isAuthenticated, logout } = useAuth();
-  const { data: bookings = [], isLoading: bookingsLoading } = useBookingsAdmin();
-  const { data: unavailable = [] } = useUnavailableDates();
+  const { data: bookings = [], isLoading: bookingsLoading, refetch: refetchBookings } = useBookingsAdmin();
+  const { data: unavailable = [], refetch: refetchUnavailable } = useUnavailableDates();
+  
+  const { addDate: blockDate, loading: blockingLoading } = useAddUnavailableDate();
+  const { removeDate: unblockDate, loading: unblockingLoading } = useRemoveUnavailableDate();
   
   // Redirect if not authenticated
   useEffect(() => {
@@ -61,9 +64,23 @@ const Dashboard = () => {
                   bookings={bookings}
                   unavailable={unavailable}
                   bookingsActions={{
-                    onBlock: async () => {},
-                    onUnblock: async () => {},
-                    isLoading: bookingsLoading
+                    onBlock: async (dateMs: number, reason?: string) => {
+                      try {
+                        await blockDate(dateMs, reason);
+                        await refetchUnavailable();
+                      } catch (error) {
+                        console.error('Failed to block date:', error);
+                      }
+                    },
+                    onUnblock: async (dateMs: number) => {
+                      try {
+                        await unblockDate(dateMs);
+                        await refetchUnavailable();
+                      } catch (error) {
+                        console.error('Failed to unblock date:', error);
+                      }
+                    },
+                    isLoading: bookingsLoading || blockingLoading || unblockingLoading
                   }}
                   onLogout={logout}
                 />

@@ -58,60 +58,7 @@ const createTables = async () => {
       FOREIGN KEY (admin_id) REFERENCES admins (id) ON DELETE CASCADE
     )`,
 
-    // Portfolio albums table
-    `CREATE TABLE IF NOT EXISTS portfolio_albums (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      title TEXT NOT NULL,
-      description TEXT NOT NULL,
-      category TEXT NOT NULL,
-      cover_image_url TEXT,
-      order_index INTEGER NOT NULL DEFAULT 0,
-      is_published BOOLEAN NOT NULL DEFAULT false,
-      created_at INTEGER NOT NULL,
-      updated_at INTEGER NOT NULL
-    )`,
 
-    // Portfolio photos table
-    `CREATE TABLE IF NOT EXISTS portfolio_photos (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      album_id INTEGER NOT NULL,
-      image_url TEXT NOT NULL,
-      caption TEXT,
-      order_index INTEGER NOT NULL DEFAULT 0,
-      created_at INTEGER NOT NULL,
-      updated_at INTEGER NOT NULL,
-      FOREIGN KEY (album_id) REFERENCES portfolio_albums (id) ON DELETE CASCADE
-    )`,
-
-    // Gallery items table
-    `CREATE TABLE IF NOT EXISTS gallery_items (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      title TEXT NOT NULL,
-      description TEXT NOT NULL,
-      badge TEXT NOT NULL,
-      icon_name TEXT NOT NULL,
-      image_url TEXT,
-      order_index INTEGER NOT NULL DEFAULT 0,
-      is_published BOOLEAN NOT NULL DEFAULT false,
-      created_at INTEGER NOT NULL,
-      updated_at INTEGER NOT NULL
-    )`,
-
-    // Packages table
-    `CREATE TABLE IF NOT EXISTS packages (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      title TEXT NOT NULL,
-      price TEXT NOT NULL,
-      description TEXT NOT NULL,
-      features TEXT NOT NULL, -- JSON array
-      add_ons TEXT NOT NULL,  -- JSON array
-      is_popular BOOLEAN NOT NULL DEFAULT false,
-      badge TEXT,
-      order_index INTEGER NOT NULL DEFAULT 0,
-      is_published BOOLEAN NOT NULL DEFAULT false,
-      created_at INTEGER NOT NULL,
-      updated_at INTEGER NOT NULL
-    )`,
 
     // Bookings table
     `CREATE TABLE IF NOT EXISTS bookings (
@@ -123,8 +70,8 @@ const createTables = async () => {
       package_name TEXT,
       user_agent TEXT,
       status TEXT NOT NULL DEFAULT 'pending',
-      created_at INTEGER NOT NULL,
-      updated_at INTEGER NOT NULL
+      created_at INTEGER DEFAULT (strftime('%s', 'now') * 1000),
+      updated_at INTEGER DEFAULT (strftime('%s', 'now') * 1000)
     )`,
 
     // Unavailable dates table
@@ -132,17 +79,10 @@ const createTables = async () => {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       date_ms INTEGER NOT NULL UNIQUE,
       reason TEXT,
-      created_at INTEGER NOT NULL
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`,
 
-    // Client logos table
-    `CREATE TABLE IF NOT EXISTS client_logos (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      logo_url TEXT NOT NULL,
-      order_index INTEGER NOT NULL DEFAULT 0,
-      created_at INTEGER NOT NULL
-    )`,
+
 
     // Analytics events table
     `CREATE TABLE IF NOT EXISTS analytics_events (
@@ -154,26 +94,7 @@ const createTables = async () => {
       created_at INTEGER NOT NULL
     )`,
 
-    // Signups table
-    `CREATE TABLE IF NOT EXISTS signups (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      email TEXT NOT NULL,
-      phone TEXT NOT NULL,
-      package_name TEXT NOT NULL,
-      user_agent TEXT,
-      created_at INTEGER NOT NULL
-    )`,
 
-    // Site settings table
-    `CREATE TABLE IF NOT EXISTS site_settings (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      key TEXT UNIQUE NOT NULL,
-      mp4_url TEXT,
-      webm_url TEXT,
-      poster_url TEXT,
-      updated_at INTEGER NOT NULL
-    )`
   ];
 
   for (const tableSQL of tables) {
@@ -184,18 +105,11 @@ const createTables = async () => {
   const indexes = [
     'CREATE INDEX IF NOT EXISTS idx_admin_sessions_token ON admin_sessions(token)',
     'CREATE INDEX IF NOT EXISTS idx_admin_sessions_expires ON admin_sessions(expires_at)',
-    'CREATE INDEX IF NOT EXISTS idx_portfolio_albums_published ON portfolio_albums(is_published, order_index)',
-    'CREATE INDEX IF NOT EXISTS idx_portfolio_albums_category ON portfolio_albums(category, order_index)',
-    'CREATE INDEX IF NOT EXISTS idx_portfolio_photos_album ON portfolio_photos(album_id, order_index)',
-    'CREATE INDEX IF NOT EXISTS idx_gallery_published ON gallery_items(is_published, order_index)',
-    'CREATE INDEX IF NOT EXISTS idx_packages_published ON packages(is_published, order_index)',
     'CREATE INDEX IF NOT EXISTS idx_bookings_date ON bookings(desired_date)',
     'CREATE INDEX IF NOT EXISTS idx_bookings_status ON bookings(status)',
     'CREATE INDEX IF NOT EXISTS idx_unavailable_dates_date ON unavailable_dates(date_ms)',
     'CREATE INDEX IF NOT EXISTS idx_analytics_created ON analytics_events(created_at)',
-    'CREATE INDEX IF NOT EXISTS idx_analytics_type ON analytics_events(type)',
-    'CREATE INDEX IF NOT EXISTS idx_client_logos_order ON client_logos(order_index)',
-    'CREATE INDEX IF NOT EXISTS idx_site_settings_key ON site_settings(key)'
+    'CREATE INDEX IF NOT EXISTS idx_analytics_type ON analytics_events(type)'
   ];
 
   for (const indexSQL of indexes) {

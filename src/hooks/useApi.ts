@@ -200,6 +200,17 @@ export function useMultipleFileUpload() {
   );
 }
 
+// Booking hooks - ACTUALLY IMPLEMENTED IN BACKEND
+export function useCreateBooking(options?: {
+  onSuccess?: (data: any) => void;
+  onError?: (error: Error) => void;
+}) {
+  return useApiMutation(
+    (data: any) => apiHelpers.bookings.create(data),
+    options
+  );
+}
+
 // Auth hooks (re-exported from auth service)
 export { useAuth } from '@/lib/auth';
 

@@ -76,4 +76,67 @@ router.patch('/:id/status', authenticateAdmin, async (req, res) => {
   }
 });
 
+// Public: Get unavailable dates
+router.get('/unavailable-dates', async (req, res) => {
+  try {
+    const db = getDatabase();
+    
+    const unavailableDates = await db.all(`
+      SELECT date_ms, reason 
+      FROM unavailable_dates 
+      ORDER BY date_ms ASC
+    `);
+
+    res.json(unavailableDates);
+  } catch (error) {
+    console.error('Get unavailable dates error:', error);
+    res.status(500).json({ error: 'Failed to fetch unavailable dates' });
+  }
+});
+
+// Admin: Add unavailable date
+router.post('/unavailable-dates', authenticateAdmin, async (req, res) => {
+  try {
+    const { date_ms, reason } = req.body;
+
+    if (!date_ms) {
+      return res.status(400).json({ error: 'Date is required' });
+    }
+
+    const db = getDatabase();
+    
+    const result = await db.run(`
+      INSERT INTO unavailable_dates (date_ms, reason) 
+      VALUES (?, ?)
+    `, [date_ms, reason || null]);
+
+    res.status(201).json({ 
+      id: result.lastID,
+      message: 'Unavailable date added successfully' 
+    });
+  } catch (error) {
+    console.error('Add unavailable date error:', error);
+    res.status(500).json({ error: 'Failed to add unavailable date' });
+  }
+});
+
+// Admin: Remove unavailable date
+router.delete('/unavailable-dates/:date_ms', authenticateAdmin, async (req, res) => {
+  try {
+    const { date_ms } = req.params;
+
+    const db = getDatabase();
+    
+    await db.run(`
+      DELETE FROM unavailable_dates 
+      WHERE date_ms = ?
+    `, [date_ms]);
+
+    res.json({ message: 'Unavailable date removed successfully' });
+  } catch (error) {
+    console.error('Remove unavailable date error:', error);
+    res.status(500).json({ error: 'Failed to remove unavailable date' });
+  }
+});
+
 export default router;

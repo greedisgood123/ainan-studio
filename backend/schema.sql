@@ -72,10 +72,12 @@ CREATE TABLE IF NOT EXISTS bookings (
   name TEXT NOT NULL,
   email TEXT NOT NULL,
   phone TEXT,
-  date_ms INTEGER NOT NULL,
+  desired_date INTEGER NOT NULL,
   package_name TEXT,
-  message TEXT,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  user_agent TEXT,
+  status TEXT DEFAULT 'pending',
+  created_at INTEGER DEFAULT (strftime('%s', 'now') * 1000),
+  updated_at INTEGER DEFAULT (strftime('%s', 'now') * 1000)
 );
 
 -- Unavailable dates table

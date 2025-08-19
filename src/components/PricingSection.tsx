@@ -43,8 +43,6 @@ export const PricingSection = () => {
         { name: "Additional member", price: "RM 50/person" },
         { name: "Rush delivery (48 hours)", price: "RM 150" }
       ],
-      isPopular: true,
-      badge: "Most Popular",
     },
     {
       title: "Large Team Session",

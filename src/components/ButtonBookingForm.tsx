@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -9,7 +9,8 @@ import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
 import { Calendar } from '@/components/ui/calendar'
-import { apiClient } from '@/lib/api'
+import { useCreateBooking } from '@/hooks/useApi'
+import { apiHelpers } from '@/lib/api'
 
 const bookingSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -27,20 +28,51 @@ interface ButtonBookingFormProps {
 }
 
 export const ButtonBookingForm = ({ packageName, isOpen, onClose }: ButtonBookingFormProps) => {
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitMessage, setSubmitMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [unavailableDates, setUnavailableDates] = useState<{ date_ms: number; reason?: string }[]>([])
+  const [isLoadingDates, setIsLoadingDates] = useState(false)
   
-  // Static unavailable dates - no backend needed for calendar
-  const staticUnavailableDays = [
-    // Next 2 weekends
-    new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 7).getTime(), // Next Saturday
-    new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 8).getTime(), // Next Sunday
-    new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 14).getTime(), // Following Saturday
-    new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 15).getTime(), // Following Sunday
-    // Some weekdays for demo
-    new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 3).getTime(), // 3 days from now
-    new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 10).getTime(), // 10 days from now
-  ]
+  const { mutate: createBooking, loading: isSubmitting } = useCreateBooking({
+    onSuccess: () => {
+      setSubmitMessage({ type: 'success', text: 'Thank you! Your booking request was submitted. We will contact you within 24 hours to confirm your appointment.' })
+      reset()
+      setSelectedDate(undefined)
+      
+      // Auto-close after 3 seconds
+      setTimeout(() => {
+        onClose()
+        setSubmitMessage(null)
+      }, 3000)
+    },
+    onError: (error) => {
+      console.error('Booking submission error:', error)
+      setSubmitMessage({ 
+        type: 'error', 
+        text: 'Sorry, something went wrong. Please try again or contact us directly.' 
+      })
+    }
+  })
+  
+  // Fetch unavailable dates from backend when form opens
+  useEffect(() => {
+    if (isOpen) {
+      setIsLoadingDates(true)
+      // Use the proper API helper
+      apiHelpers.unavailableDates.getList()
+        .then((data: { date_ms: number; reason?: string }[]) => {
+          console.log('✅ Fetched unavailable dates:', data)
+          setUnavailableDates(data)
+        })
+        .catch(error => {
+          console.error('❌ Failed to fetch unavailable dates:', error)
+          // Set empty array on error to prevent blocking all dates
+          setUnavailableDates([])
+        })
+        .finally(() => {
+          setIsLoadingDates(false)
+        })
+    }
+  }, [isOpen])
 
   const {
     register,
@@ -56,53 +88,30 @@ export const ButtonBookingForm = ({ packageName, isOpen, onClose }: ButtonBookin
   const isDateBlocked = (d?: Date) => {
     if (!d) return false
     const start = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()
-    return staticUnavailableDays.includes(start)
+    return unavailableDates.some(date => date.date_ms === start)
   }
 
   const onSubmit = async (data: BookingFormData) => {
-    setIsSubmitting(true)
     setSubmitMessage(null)
 
-    try {
-      const desired = selectedDate ?? data.desiredDate
-      if (!desired) throw new Error('Please select a desired date')
-      if (isDateBlocked(desired)) {
-        setSubmitMessage({ type: 'error', text: 'This date is unavailable. Please choose another date.' })
-        setIsSubmitting(false)
-        return
-      }
-      
-      const desiredDateMs = new Date(desired.getFullYear(), desired.getMonth(), desired.getDate()).getTime()
-      
-      // Submit booking to backend
-      await apiClient.post('/api/bookings', {
-        name: data.name,
-        email: data.email,
-        phone: data.phone,
-        desiredDateMs,
-        packageName,
-        userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
-      })
-      
-      setSubmitMessage({ type: 'success', text: 'Thank you! Your booking request was submitted. We will contact you within 24 hours to confirm your appointment.' })
-      reset()
-      setSelectedDate(undefined)
-      
-      // Auto-close after 3 seconds
-      setTimeout(() => {
-        onClose()
-        setSubmitMessage(null)
-      }, 3000)
-      
-    } catch (error) {
-      console.error('Booking submission error:', error)
-      setSubmitMessage({ 
-        type: 'error', 
-        text: 'Sorry, something went wrong. Please try again or contact us directly.' 
-      })
-    } finally {
-      setIsSubmitting(false)
+    const desired = selectedDate ?? data.desiredDate
+    if (!desired) throw new Error('Please select a desired date')
+    if (isDateBlocked(desired)) {
+      setSubmitMessage({ type: 'error', text: 'This date is unavailable. Please choose another date.' })
+      return
     }
+    
+    const desiredDateMs = new Date(desired.getFullYear(), desired.getMonth(), desired.getDate()).getTime()
+    
+    // Submit booking to backend using the hook
+    createBooking({
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      desiredDate: desiredDateMs,
+      packageName,
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
+    })
   }
 
   const handleClose = () => {

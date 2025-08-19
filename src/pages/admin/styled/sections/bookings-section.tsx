@@ -10,19 +10,18 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 
 export type BookingItem = {
-  _id: string
+  id: string
   name: string
   email: string
   phone: string
-  desiredDateMs: number
-  packageName?: string
+  desired_date: number
+  package_name?: string
   status: string
-  createdAt: number
+  created_at: number
 }
 
 export type UnavailableDate = {
-  _id: string
-  dateMs: number
+  date_ms: number
   reason?: string
 }
 
@@ -42,12 +41,12 @@ export function BookingsSection({
   const [selected, setSelected] = useState<Date | undefined>(undefined)
   const [reason, setReason] = useState<string>("")
 
-  const unavailableSet = useMemo(() => new Set(unavailable.map(u => new Date(u.dateMs).toDateString())), [unavailable])
+  const unavailableSet = useMemo(() => new Set(unavailable.map(u => new Date(u.date_ms).toDateString())), [unavailable])
 
   const bookingsByDate = useMemo(() => {
     const m = new Map<string, BookingItem[]>()
     for (const b of bookings) {
-      const key = new Date(b.desiredDateMs).toDateString()
+      const key = new Date(b.desired_date).toDateString()
       m.set(key, [...(m.get(key) ?? []), b])
     }
     return m
@@ -58,11 +57,11 @@ export function BookingsSection({
   const isSelectedBlocked = selectedKey ? unavailableSet.has(selectedKey) : false
 
   const allBookingsSorted = useMemo(() =>
-    [...bookings].sort((a, b) => (a.desiredDateMs - b.desiredDateMs) || (a.createdAt - b.createdAt))
+    [...bookings].sort((a, b) => (a.desired_date - b.desired_date) || (a.created_at - b.created_at))
   , [bookings])
 
   const blockedSorted = useMemo(() =>
-    [...unavailable].sort((a, b) => a.dateMs - b.dateMs)
+    [...unavailable].sort((a, b) => a.date_ms - b.date_ms)
   , [unavailable])
 
   return (
@@ -155,20 +154,22 @@ export function BookingsSection({
           ) : (
             <div className="divide-y rounded border">
               {allBookingsSorted.map(b => (
-                <div key={b._id} className="p-3 grid gap-2 sm:grid-cols-6">
-                  <div className="text-sm font-medium">{new Date(b.desiredDateMs).toDateString()}</div>
+                <div key={b.id} className="p-3 grid gap-2 sm:grid-cols-6">
+                  <div className="text-sm font-medium">
+                    {b.desired_date ? new Date(b.desired_date).toDateString() : 'Invalid Date'}
+                  </div>
                   <div className="sm:col-span-2">
                     <div className="font-medium">{b.name}</div>
                     <div className="text-xs text-muted-foreground">{b.email} · {b.phone}</div>
                   </div>
                   <div>
-                    <Badge variant="secondary">{b.packageName || 'General'}</Badge>
+                    <Badge variant="secondary">{b.package_name || 'General'}</Badge>
                   </div>
                   <div>
                     <Badge>{b.status}</Badge>
                   </div>
                   <div className="text-xs text-muted-foreground self-center">
-                    {new Date(b.createdAt).toLocaleString()}
+                    {b.created_at ? new Date(b.created_at).toLocaleString() : 'Invalid Date'}
                   </div>
                 </div>
               ))}
@@ -187,12 +188,12 @@ export function BookingsSection({
           ) : (
             <div className="divide-y rounded border">
               {blockedSorted.map((d) => (
-                <div key={d._id} className="p-3 flex items-center justify-between gap-3">
+                <div key={d.date_ms} className="p-3 flex items-center justify-between gap-3">
                   <div>
-                    <div className="font-medium">{new Date(d.dateMs).toDateString()}</div>
+                    <div className="font-medium">{new Date(d.date_ms).toDateString()}</div>
                     {d.reason && <div className="text-xs text-muted-foreground">{d.reason}</div>}
                   </div>
-                  <Button variant="outline" size="sm" onClick={() => onUnavailUnblock?.(d.dateMs)}>Unblock</Button>
+                  <Button variant="outline" size="sm" onClick={() => onUnavailUnblock?.(d.date_ms)}>Unblock</Button>
                 </div>
               ))}
             </div>

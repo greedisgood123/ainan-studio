@@ -13,7 +13,7 @@ export const api = {
     logout: `${API_BASE_URL}/api/auth/logout`,
   },
   
-  // Gallery endpoints
+  // Gallery endpoints - NOT IMPLEMENTED IN BACKEND
   gallery: {
     public: `${API_BASE_URL}/api/gallery/public`,
     admin: `${API_BASE_URL}/api/gallery/admin`,
@@ -22,7 +22,7 @@ export const api = {
     delete: (id: string) => `${API_BASE_URL}/api/gallery/${id}`,
   },
   
-  // Portfolio endpoints
+  // Portfolio endpoints - NOT IMPLEMENTED IN BACKEND
   portfolio: {
     public: `${API_BASE_URL}/api/portfolio/public`,
     admin: `${API_BASE_URL}/api/portfolio/admin`,
@@ -34,7 +34,7 @@ export const api = {
     addPhoto: (id: string) => `${API_BASE_URL}/api/portfolio/albums/${id}/photos`,
   },
   
-  // Packages endpoints
+  // Packages endpoints - NOT IMPLEMENTED IN BACKEND
   packages: {
     public: `${API_BASE_URL}/api/packages/public`,
     admin: `${API_BASE_URL}/api/packages/admin`,
@@ -43,22 +43,22 @@ export const api = {
     delete: (id: string) => `${API_BASE_URL}/api/packages/${id}`,
   },
   
-  // Bookings endpoints
+  // Bookings endpoints - PARTIALLY IMPLEMENTED
   bookings: {
     create: `${API_BASE_URL}/api/bookings`,
     admin: `${API_BASE_URL}/api/bookings/admin`,
-    update: (id: string) => `${API_BASE_URL}/api/bookings/${id}`,
+    updateStatus: (id: string) => `${API_BASE_URL}/api/bookings/${id}/status`, // ✅ FIXED: matches backend
     delete: (id: string) => `${API_BASE_URL}/api/bookings/${id}`,
   },
   
-  // Unavailable dates
+  // Unavailable dates - FIXED to match backend
   unavailableDates: {
     list: `${API_BASE_URL}/api/bookings/unavailable-dates`,
-    block: `${API_BASE_URL}/api/bookings/block-date`,
-    unblock: (dateMs: number) => `${API_BASE_URL}/api/bookings/unblock-date/${dateMs}`,
+    add: `${API_BASE_URL}/api/bookings/unavailable-dates`, // ✅ FIXED: matches backend
+    remove: (dateMs: number) => `${API_BASE_URL}/api/bookings/unavailable-dates/${dateMs}`, // ✅ FIXED: matches backend
   },
   
-  // Client logos endpoints
+  // Client logos endpoints - NOT IMPLEMENTED IN BACKEND
   clientLogos: {
     list: `${API_BASE_URL}/api/client-logos`,
     create: `${API_BASE_URL}/api/client-logos`,
@@ -66,20 +66,20 @@ export const api = {
     delete: (id: string) => `${API_BASE_URL}/api/client-logos/${id}`,
   },
   
-  // File upload endpoints
+  // File upload endpoints - NOT IMPLEMENTED IN BACKEND
   files: {
     upload: `${API_BASE_URL}/api/files/upload`,
     uploadMultiple: `${API_BASE_URL}/api/files/upload-multiple`,
     delete: `${API_BASE_URL}/api/files/delete`,
   },
   
-  // Site settings
+  // Site settings - NOT IMPLEMENTED IN BACKEND
   siteSettings: {
     get: `${API_BASE_URL}/api/site-settings`,
     setHero: `${API_BASE_URL}/api/site-settings/hero`,
   },
   
-  // Analytics
+  // Analytics - NOT IMPLEMENTED IN BACKEND
   analytics: {
     track: `${API_BASE_URL}/api/analytics/track`,
     admin: `${API_BASE_URL}/api/analytics/admin`,
@@ -382,6 +382,74 @@ export const apiHelpers = {
         return apiHelpers.handleResponse(response);
       } catch (error) {
         console.error(`❌ add photo to album ${albumId} failed:`, error);
+        throw error;
+      }
+    },
+  },
+
+  // Booking operations - ACTUALLY IMPLEMENTED IN BACKEND
+  bookings: {
+    async create(data: any) {
+      try {
+        console.log('📅 Creating booking...', data);
+        const response = await apiClient.post(api.bookings.create, data);
+        return apiHelpers.handleResponse(response);
+      } catch (error) {
+        console.error('❌ create booking failed:', error);
+        throw error;
+      }
+    },
+    async getAdmin() {
+      try {
+        console.log('📅 Getting admin bookings...');
+        const response = await apiClient.get(api.bookings.admin);
+        return apiHelpers.handleResponse(response);
+      } catch (error) {
+        console.error('❌ getAdmin bookings failed:', error);
+        throw error;
+      }
+    },
+    async updateStatus(id: string, status: string) {
+      try {
+        console.log(`📅 Updating booking ${id} status to ${status}...`);
+        const response = await apiClient.put(api.bookings.updateStatus(id), { status });
+        return apiHelpers.handleResponse(response);
+      } catch (error) {
+        console.error(`❌ update booking status ${id} failed:`, error);
+        throw error;
+      }
+    },
+  },
+
+  // Unavailable dates operations - ACTUALLY IMPLEMENTED IN BACKEND
+  unavailableDates: {
+    async getList() {
+      try {
+        console.log('📅 Getting unavailable dates...');
+        const response = await apiClient.get(api.unavailableDates.list);
+        return apiHelpers.handleResponse(response);
+      } catch (error) {
+        console.error('❌ get unavailable dates failed:', error);
+        throw error;
+      }
+    },
+    async add(dateMs: number, reason?: string) {
+      try {
+        console.log('📅 Adding unavailable date...', { dateMs, reason });
+        const response = await apiClient.post(api.unavailableDates.add, { date_ms: dateMs, reason });
+        return apiHelpers.handleResponse(response);
+      } catch (error) {
+        console.error('❌ add unavailable date failed:', error);
+        throw error;
+      }
+    },
+    async remove(dateMs: number) {
+      try {
+        console.log('📅 Removing unavailable date...', { dateMs });
+        const response = await apiClient.delete(api.unavailableDates.remove(dateMs));
+        return apiHelpers.handleResponse(response);
+      } catch (error) {
+        console.error('❌ remove unavailable date failed:', error);
         throw error;
       }
     },
