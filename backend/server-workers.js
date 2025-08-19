@@ -188,7 +188,7 @@ app.post('/api/bookings', async (c) => {
   try {
     const booking = await c.req.json()
     
-    // Mock booking creation
+    // Create new booking
     const newBooking = {
       id: Date.now(),
       name: booking.name,
@@ -202,6 +202,18 @@ app.post('/api/bookings', async (c) => {
       updated_at: Date.now()
     }
     
+    // Get existing bookings from KV
+    const existingBookings = await getBookingsFromKV(c.env.BOOKINGS_KV)
+    
+    // Add new booking
+    existingBookings.push(newBooking)
+    
+    // Save back to KV
+    await saveBookingsToKV(c.env.BOOKINGS_KV, existingBookings)
+    
+    console.log('✅ New booking created:', newBooking)
+    console.log('📊 Total bookings:', existingBookings.length)
+    
     return c.json(newBooking)
   } catch (error) {
     console.error('Booking creation error:', error)
@@ -210,39 +222,76 @@ app.post('/api/bookings', async (c) => {
 })
 
 app.get('/api/bookings/admin', async (c) => {
-  // Mock admin bookings list
-  const bookings = [
-    {
-      id: 1,
-      name: "John Doe",
-      email: "john@example.com",
-      phone: "+1234567890",
-      desired_date: Date.now() + 7 * 24 * 60 * 60 * 1000,
-      package_name: "Solo Headshot Session",
-      user_agent: "Mozilla/5.0...",
-      status: "pending",
-      created_at: Date.now() - 24 * 60 * 60 * 1000,
-      updated_at: Date.now() - 24 * 60 * 60 * 1000
-    }
-  ]
-  
-  return c.json(bookings)
+  try {
+    // Get all bookings from KV storage
+    const bookings = await getBookingsFromKV(c.env.BOOKINGS_KV)
+    return c.json(bookings)
+  } catch (error) {
+    console.error('Error getting bookings:', error)
+    return c.json({ error: 'Failed to get bookings' }, 500)
+  }
 })
 
-// In-memory storage for unavailable dates (in production, use a database)
-let unavailableDates = [
-  { date_ms: Date.now() + 7 * 24 * 60 * 60 * 1000, reason: "Holiday" },
-  { date_ms: Date.now() + 14 * 24 * 60 * 60 * 1000, reason: "Personal" }
-]
+// Helper functions for KV storage
+async function getBookingsFromKV(kv) {
+  try {
+    const bookingsData = await kv.get('bookings', { type: 'json' })
+    return bookingsData || []
+  } catch (error) {
+    console.error('Error getting bookings from KV:', error)
+    return []
+  }
+}
+
+async function saveBookingsToKV(kv, bookings) {
+  try {
+    await kv.put('bookings', JSON.stringify(bookings))
+  } catch (error) {
+    console.error('Error saving bookings to KV:', error)
+  }
+}
+
+async function getUnavailableDatesFromKV(kv) {
+  try {
+    const datesData = await kv.get('unavailable_dates', { type: 'json' })
+    return datesData || [
+      { date_ms: Date.now() + 7 * 24 * 60 * 60 * 1000, reason: "Holiday" },
+      { date_ms: Date.now() + 14 * 24 * 60 * 60 * 1000, reason: "Personal" }
+    ]
+  } catch (error) {
+    console.error('Error getting unavailable dates from KV:', error)
+    return [
+      { date_ms: Date.now() + 7 * 24 * 60 * 60 * 1000, reason: "Holiday" },
+      { date_ms: Date.now() + 14 * 24 * 60 * 60 * 1000, reason: "Personal" }
+    ]
+  }
+}
+
+async function saveUnavailableDatesToKV(kv, dates) {
+  try {
+    await kv.put('unavailable_dates', JSON.stringify(dates))
+  } catch (error) {
+    console.error('Error saving unavailable dates to KV:', error)
+  }
+}
 
 // Unavailable dates
 app.get('/api/bookings/unavailable-dates', async (c) => {
-  return c.json(unavailableDates)
+  try {
+    const unavailableDates = await getUnavailableDatesFromKV(c.env.BOOKINGS_KV)
+    return c.json(unavailableDates)
+  } catch (error) {
+    console.error('Error getting unavailable dates:', error)
+    return c.json({ error: 'Failed to get unavailable dates' }, 500)
+  }
 })
 
 app.post('/api/bookings/unavailable-dates', async (c) => {
   try {
     const { date_ms, reason } = await c.req.json()
+    
+    // Get existing unavailable dates from KV
+    const unavailableDates = await getUnavailableDatesFromKV(c.env.BOOKINGS_KV)
     
     // Check if date already exists
     const existingIndex = unavailableDates.findIndex(d => d.date_ms === date_ms)
@@ -259,6 +308,9 @@ app.post('/api/bookings/unavailable-dates', async (c) => {
     }
     unavailableDates.push(newDate)
     
+    // Save back to KV
+    await saveUnavailableDatesToKV(c.env.BOOKINGS_KV, unavailableDates)
+    
     return c.json(newDate)
   } catch (error) {
     console.error('Add unavailable date error:', error)
@@ -270,13 +322,19 @@ app.delete('/api/bookings/unavailable-dates/:dateMs', async (c) => {
   try {
     const dateMs = parseInt(c.req.param('dateMs'))
     
+    // Get existing unavailable dates from KV
+    const unavailableDates = await getUnavailableDatesFromKV(c.env.BOOKINGS_KV)
+    
     // Remove the date from the array
     const initialLength = unavailableDates.length
-    unavailableDates = unavailableDates.filter(d => d.date_ms !== dateMs)
+    const filteredDates = unavailableDates.filter(d => d.date_ms !== dateMs)
     
-    if (unavailableDates.length === initialLength) {
+    if (filteredDates.length === initialLength) {
       return c.json({ error: 'Date not found' }, 404)
     }
+    
+    // Save back to KV
+    await saveUnavailableDatesToKV(c.env.BOOKINGS_KV, filteredDates)
     
     return c.json({ message: 'Unavailable date removed successfully' })
   } catch (error) {
