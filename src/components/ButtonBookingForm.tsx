@@ -53,24 +53,34 @@ export const ButtonBookingForm = ({ packageName, isOpen, onClose }: ButtonBookin
     }
   })
   
-  // Fetch unavailable dates from backend when form opens
+  // Fetch unavailable dates from backend when form opens and refresh periodically
   useEffect(() => {
     if (isOpen) {
-      setIsLoadingDates(true)
-      // Use the proper API helper
-      apiHelpers.unavailableDates.getList()
-        .then((data: { date_ms: number; reason?: string }[]) => {
-          console.log('✅ Fetched unavailable dates:', data)
-          setUnavailableDates(data)
-        })
-        .catch(error => {
-          console.error('❌ Failed to fetch unavailable dates:', error)
-          // Set empty array on error to prevent blocking all dates
-          setUnavailableDates([])
-        })
-        .finally(() => {
-          setIsLoadingDates(false)
-        })
+      const fetchUnavailableDates = () => {
+        setIsLoadingDates(true)
+        // Use the proper API helper
+        apiHelpers.unavailableDates.getList()
+          .then((data: { date_ms: number; reason?: string }[]) => {
+            console.log('✅ Fetched unavailable dates:', data)
+            setUnavailableDates(data)
+          })
+          .catch(error => {
+            console.error('❌ Failed to fetch unavailable dates:', error)
+            // Set empty array on error to prevent blocking all dates
+            setUnavailableDates([])
+          })
+          .finally(() => {
+            setIsLoadingDates(false)
+          })
+      }
+
+      // Fetch immediately
+      fetchUnavailableDates()
+
+      // Refresh every 30 seconds while form is open
+      const interval = setInterval(fetchUnavailableDates, 30000)
+
+      return () => clearInterval(interval)
     }
   }, [isOpen])
 

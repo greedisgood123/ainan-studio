@@ -28,17 +28,69 @@ app.get('/api/health', (c) => {
 
 // Auth routes
 app.post('/api/auth/login', async (c) => {
-  const { email, password } = await c.req.json()
-  
-  // Simple authentication for now
-  if (email === 'admin@ainanstudio.com' && password === 'admin123') {
-    return c.json({ 
-      token: 'mock-jwt-token',
-      user: { email, role: 'admin' }
-    })
+  try {
+    const { email, password } = await c.req.json()
+    
+    // Check for required fields
+    if (!email || !password) {
+      return c.json({ error: 'Email and password are required' }, 400)
+    }
+
+    // Get environment variables
+    const adminEmail = c.env.ADMIN_EMAIL || 'admin@ainanstudio.com'
+    const adminPassword = c.env.ADMIN_PASSWORD || 'admin123'
+    
+    // Simple authentication for Cloudflare Workers
+    if (email === adminEmail && password === adminPassword) {
+      // Generate a simple token (in production, use proper JWT)
+      const token = `cf-token-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      
+      return c.json({ 
+        token,
+        admin: { 
+          id: 1,
+          email: adminEmail 
+        }
+      })
+    }
+    
+    return c.json({ error: 'Invalid credentials' }, 401)
+  } catch (error) {
+    console.error('Login error:', error)
+    return c.json({ error: 'Login failed' }, 500)
   }
-  
-  return c.json({ error: 'Invalid credentials' }, 401)
+})
+
+app.get('/api/auth/me', async (c) => {
+  try {
+    const authHeader = c.req.header('Authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return c.json({ error: 'No token provided' }, 401)
+    }
+
+    const token = authHeader.substring(7)
+    
+    // Simple token validation for Cloudflare Workers
+    if (token.startsWith('cf-token-')) {
+      return c.json({
+        admin: {
+          id: 1,
+          email: c.env.ADMIN_EMAIL || 'admin@ainanstudio.com'
+        }
+      })
+    }
+    
+    return c.json({ error: 'Invalid token' }, 401)
+  } catch (error) {
+    console.error('Token verification error:', error)
+    return c.json({ error: 'Invalid token' }, 401)
+  }
+})
+
+app.post('/api/auth/logout', async (c) => {
+  // For Cloudflare Workers, we just return success
+  // In a real implementation, you might want to blacklist the token
+  return c.json({ message: 'Logged out successfully' })
 })
 
 // Gallery routes
@@ -133,25 +185,104 @@ app.get('/api/packages/public', async (c) => {
 
 // Bookings routes
 app.post('/api/bookings', async (c) => {
-  const booking = await c.req.json()
-  
-  // Mock booking creation
-  return c.json({
-    id: Date.now(),
-    ...booking,
-    created_at: new Date().toISOString()
-  })
+  try {
+    const booking = await c.req.json()
+    
+    // Mock booking creation
+    const newBooking = {
+      id: Date.now(),
+      name: booking.name,
+      email: booking.email,
+      phone: booking.phone,
+      desired_date: booking.desiredDate,
+      package_name: booking.packageName,
+      user_agent: booking.userAgent,
+      status: 'pending',
+      created_at: Date.now(),
+      updated_at: Date.now()
+    }
+    
+    return c.json(newBooking)
+  } catch (error) {
+    console.error('Booking creation error:', error)
+    return c.json({ error: 'Failed to create booking' }, 500)
+  }
 })
 
-// Unavailable dates
-app.get('/api/unavailable-dates', async (c) => {
-  // Mock unavailable dates
-  const unavailableDates = [
-    { dateMs: Date.now() + 7 * 24 * 60 * 60 * 1000, reason: "Holiday" },
-    { dateMs: Date.now() + 14 * 24 * 60 * 60 * 1000, reason: "Personal" }
+app.get('/api/bookings/admin', async (c) => {
+  // Mock admin bookings list
+  const bookings = [
+    {
+      id: 1,
+      name: "John Doe",
+      email: "john@example.com",
+      phone: "+1234567890",
+      desired_date: Date.now() + 7 * 24 * 60 * 60 * 1000,
+      package_name: "Solo Headshot Session",
+      user_agent: "Mozilla/5.0...",
+      status: "pending",
+      created_at: Date.now() - 24 * 60 * 60 * 1000,
+      updated_at: Date.now() - 24 * 60 * 60 * 1000
+    }
   ]
   
+  return c.json(bookings)
+})
+
+// In-memory storage for unavailable dates (in production, use a database)
+let unavailableDates = [
+  { date_ms: Date.now() + 7 * 24 * 60 * 60 * 1000, reason: "Holiday" },
+  { date_ms: Date.now() + 14 * 24 * 60 * 60 * 1000, reason: "Personal" }
+]
+
+// Unavailable dates
+app.get('/api/bookings/unavailable-dates', async (c) => {
   return c.json(unavailableDates)
+})
+
+app.post('/api/bookings/unavailable-dates', async (c) => {
+  try {
+    const { date_ms, reason } = await c.req.json()
+    
+    // Check if date already exists
+    const existingIndex = unavailableDates.findIndex(d => d.date_ms === date_ms)
+    if (existingIndex !== -1) {
+      return c.json({ error: 'Date already blocked' }, 400)
+    }
+    
+    // Add new unavailable date
+    const newDate = {
+      id: Date.now(),
+      date_ms,
+      reason,
+      created_at: new Date().toISOString()
+    }
+    unavailableDates.push(newDate)
+    
+    return c.json(newDate)
+  } catch (error) {
+    console.error('Add unavailable date error:', error)
+    return c.json({ error: 'Failed to add unavailable date' }, 500)
+  }
+})
+
+app.delete('/api/bookings/unavailable-dates/:dateMs', async (c) => {
+  try {
+    const dateMs = parseInt(c.req.param('dateMs'))
+    
+    // Remove the date from the array
+    const initialLength = unavailableDates.length
+    unavailableDates = unavailableDates.filter(d => d.date_ms !== dateMs)
+    
+    if (unavailableDates.length === initialLength) {
+      return c.json({ error: 'Date not found' }, 404)
+    }
+    
+    return c.json({ message: 'Unavailable date removed successfully' })
+  } catch (error) {
+    console.error('Remove unavailable date error:', error)
+    return c.json({ error: 'Failed to remove unavailable date' }, 500)
+  }
 })
 
 // Site settings

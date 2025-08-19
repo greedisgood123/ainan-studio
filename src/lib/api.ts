@@ -1,6 +1,6 @@
 // API Configuration for local backend integration
 const API_BASE_URL = import.meta.env.PROD
-  ? import.meta.env.VITE_API_BASE_URL || 'https://your-deployed-backend.com'
+  ? import.meta.env.VITE_API_BASE_URL || 'https://ainan-studio-backend.ainanstudio.workers.dev'
   : 'http://localhost:3001';
 
 export const api = {
