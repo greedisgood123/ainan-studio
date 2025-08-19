@@ -1,6 +1,6 @@
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
-import bcrypt from 'bcryptjs';
+import bcryptjs from 'bcryptjs';
 import path from 'path';
 import dotenv from 'dotenv';
 
@@ -219,7 +219,7 @@ const createDefaultAdmin = async () => {
     }
 
     // Create admin user
-    const passwordHash = await bcrypt.hash(adminPassword, 12);
+    const passwordHash = await bcryptjs.hash(adminPassword, 12);
     const now = Date.now();
 
     await db.run(

@@ -13,86 +13,54 @@ export const PricingSection = () => {
   const staticPackagesData = [
     {
       title: "Solo Headshot Session",
-      price: "RM 350",
-      description: "For individuals who want to stand out professionally.",
+      price: "RM 250",
+      description: "For individuals who want to stand out professionally. (1 pax)",
       features: [
         "15 min session at your location",
         "4-5 final retouched images (client selects from gallery)",
         "1 outfit, 1 background setup",
-        "Web + print resolution delivery",
-        "3–5 working day turnaround"
+        "Online gallery for 2 weeks",
+        "3-5 working day delivery"
       ],
       addOns: [
-        { name: "Transparent background", price: "RM 30/image" },
+        { name: "Transparent background", price: "RM 20/image" },
         { name: "Rush delivery (48 hours)", price: "RM 150" }
       ]
     },
     {
-      title: "Team Headshot Session",
-      price: "RM 1,200",
-      description: "Perfect for small teams needing consistent, professional looks.",
+      title: "Team Session",
+      price: "RM 500",
+      description: "Ideal for small to mid-sized teams. (4-10 pax)",
       features: [
-        "Up to 8 team members",
-        "30–45 min total on-site",
-        "1 background setup",
-        "Web + print resolution delivery",
-        "3–5 working day turnaround",
+        "1 hour min session at your location",
+        "Portable studio setup at your location",
+        "4 final retouched image/person",
+        "Group photos included",
+        "Online gallery for 2 weeks",
+        "1 week delivery"
       ],
       addOns: [
-        { name: "Additional member", price: "RM 120/person" },
-        { name: "On-site makeup artist", price: "RM 350" },
+        { name: "Additional member", price: "RM 50/person" },
+        { name: "Rush delivery (48 hours)", price: "RM 150" }
       ],
       isPopular: true,
       badge: "Most Popular",
     },
     {
-      title: "Executive Branding",
-      price: "RM 2,400",
-      description: "Premium session for C-level and founders to elevate personal brand.",
+      title: "Large Team Session",
+      price: "RM 1,500",
+      description: "Corporate headshots for up to 30 members (10-30 pax)",
       features: [
-        "Up to 2 hours on-site",
-        "Multiple outfit and background changes",
-        "10–12 final retouched images",
-        "Creative direction and posing guidance",
-        "48–72 hour priority delivery",
+        "3 hour max session at your location",
+        "Portable studio setup at your location",
+        "5 final retouched image/person",
+        "Group photos Included",
+        "Online gallery for 2 weeks",
+        "1-2 week delivery"
       ],
       addOns: [
-        { name: "Location scouting", price: "RM 300" },
-        { name: "Additional retouched image", price: "RM 40/image" },
-      ],
-    },
-    {
-      title: "Corporate Event Coverage",
-      price: "RM 3,500",
-      description: "Complete coverage for corporate events, conferences, and team building.",
-      features: [
-        "Full day coverage (up to 8 hours)",
-        "Professional event photography",
-        "Live streaming capabilities",
-        "100+ edited images",
-        "Event highlights video",
-        "1 week delivery",
-      ],
-      addOns: [
-        { name: "Additional photographer", price: "RM 800/day" },
-        { name: "Video editing", price: "RM 500" },
-      ],
-    },
-    {
-      title: "Product Photography",
-      price: "RM 800",
-      description: "Professional product photography for e-commerce and marketing.",
-      features: [
-        "Studio-quality product shots",
-        "Multiple angles and backgrounds",
-        "15-20 edited images",
-        "White background option",
-        "Lifestyle context shots",
-        "3-5 working day delivery",
-      ],
-      addOns: [
-        { name: "360° product view", price: "RM 200" },
-        { name: "Video product showcase", price: "RM 400" },
+        { name: "Additional member", price: "RM 40/person" },
+        { name: "Rush delivery (48 hours)", price: "RM 150" }
       ],
     },
   ];
@@ -132,6 +100,35 @@ export const PricingSection = () => {
           <CarouselPrevious />
           <CarouselNext />
         </Carousel>
+
+        {/* Add-On Section */}
+        <div className="mt-16 flex justify-center">
+          <div className="bg-white rounded-lg shadow-soft p-8 max-w-md w-full">
+            <h3 className="text-2xl font-bold text-center mb-6">Add-On</h3>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-foreground">Extra Retouched Image</span>
+                <span className="font-medium text-foreground">20/image</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-foreground">Transparent White Background</span>
+                <span className="font-medium text-foreground">20/image</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-foreground">Rush Delivery</span>
+                <span className="font-medium text-foreground">150</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-foreground">Group Photo (if not included)</span>
+                <span className="font-medium text-foreground">100</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-foreground">Makeup Artist</span>
+                <span className="font-medium text-foreground">Upon Request</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );

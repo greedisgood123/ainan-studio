@@ -5,9 +5,12 @@ import { AppSidebar } from "./styled/app-sidebar";
 import { AdminDashboard } from "./styled/admin-dashboard";
 import { CleanupDashboard } from "./CleanupDashboard";
 import { useAuth } from "@/lib/auth";
+import { useBookingsAdmin, useUnavailableDates } from "@/hooks/useAdminApi";
 
 const Dashboard = () => {
   const { isAuthenticated, logout } = useAuth();
+  const { data: bookings = [], isLoading: bookingsLoading } = useBookingsAdmin();
+  const { data: unavailable = [] } = useUnavailableDates();
   
   // Redirect if not authenticated
   useEffect(() => {
@@ -46,11 +49,24 @@ const Dashboard = () => {
           </header>
           <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
             <Tabs defaultValue="cleanup" className="flex-1">
-              <TabsList className="grid w-full grid-cols-1">
-                <TabsTrigger value="cleanup">Cleanup Dashboard</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="cleanup">Migration Status</TabsTrigger>
+                <TabsTrigger value="admin">Full Admin</TabsTrigger>
               </TabsList>
               <TabsContent value="cleanup" className="flex-1">
                 <CleanupDashboard adminToken="" />
+              </TabsContent>
+              <TabsContent value="admin" className="flex-1">
+                <AdminDashboard
+                  bookings={bookings}
+                  unavailable={unavailable}
+                  bookingsActions={{
+                    onBlock: async () => {},
+                    onUnblock: async () => {},
+                    isLoading: bookingsLoading
+                  }}
+                  onLogout={logout}
+                />
               </TabsContent>
             </Tabs>
           </div>

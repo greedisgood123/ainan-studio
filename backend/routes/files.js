@@ -3,7 +3,10 @@ import multer from 'multer';
 import sharp from 'sharp';
 import path from 'path';
 import fs from 'fs';
-import { v4 as uuidv4 } from 'uuid';
+// Generate unique filename using timestamp and random number
+const generateUniqueName = () => {
+  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+};
 import { authenticateAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -18,7 +21,7 @@ const storage = multer.diskStorage({
     cb(null, uploadPath);
   },
   filename: (req, file, cb) => {
-    const uniqueName = `${uuidv4()}-${Date.now()}${path.extname(file.originalname)}`;
+    const uniqueName = `${generateUniqueName()}${path.extname(file.originalname)}`;
     cb(null, uniqueName);
   }
 });

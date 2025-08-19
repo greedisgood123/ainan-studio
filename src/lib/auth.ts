@@ -38,9 +38,9 @@ class AuthService {
 
   private async validateToken() {
     try {
-      const user = await apiHelpers.auth.getProfile();
+      const response = await apiHelpers.auth.getProfile() as { admin: AdminUser };
       this.state = {
-        user,
+        user: response.admin,
         token: this.state.token,
         isAuthenticated: true,
         isLoading: false,
@@ -81,7 +81,7 @@ class AuthService {
       this.state.isLoading = true;
       this.notifyListeners();
 
-      const response = await apiHelpers.auth.login(email, password);
+      const response = await apiHelpers.auth.login(email, password) as { token: string; admin: AdminUser };
       
       if (response.token && response.admin) {
         localStorage.setItem('admin_token', response.token);

@@ -17,7 +17,7 @@ import image10 from "@/assets/imagesCarousel/0FK_0696.webp";
 
 export const Portfolio = () => {
   const [activeFilter, setActiveFilter] = useState("All");
-  const filters = ["All", "Weddings", "Corporate", "Livefeed", "Portraits", "Events"];
+  const filters = ["All", "Weddings", "Corporate", "Livefeed", "Events"];
   
   // Static portfolio data - no backend needed
   const staticPortfolioData = [
@@ -93,18 +93,7 @@ export const Portfolio = () => {
         image3  // AIN00718.webp
       ]
     },
-    {
-      id: "7",
-      title: "Executive Portrait Session",
-      description: "Premium portrait photography for C-level executives, creating powerful personal branding images.",
-      category: "Portraits",
-      coverUrl: image8, // FKP03935.webp
-      photos: [
-        image8, // FKP03935.webp
-        image2, // AIN00523.webp
-        image5  // DSC_3411.webp
-      ]
-    },
+
     {
       id: "8",
       title: "Team Building Event",
@@ -129,18 +118,7 @@ export const Portfolio = () => {
         image10 // 0FK_0696.webp
       ]
     },
-    {
-      id: "10",
-      title: "Studio Photography Session",
-      description: "Professional studio photography with controlled lighting and perfect backdrops for corporate branding.",
-      category: "Portraits",
-      coverUrl: image4, // Amin-Rashidi-Studio-664.webp
-      photos: [
-        image4, // Amin-Rashidi-Studio-664.webp
-        image1, // 20191208-LAN_0281.webp
-        image2  // AIN00523.webp
-      ]
-    },
+
     {
       id: "11",
       title: "Corporate Event Photography",

@@ -4,7 +4,19 @@
   "type": "module",
   "main": "server-workers.js",
   "dependencies": {
-    "hono": "^3.12.0"
+    "@types/uuid": "^10.0.0",
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.0.1",
+    "helmet": "^8.1.0",
+    "hono": "^3.12.0",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.0.2",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "wrangler": "^4.30.0"

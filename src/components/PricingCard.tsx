@@ -82,7 +82,7 @@ export const PricingCard = ({ title, price, description, features, addOns, isPop
           size="lg"
           onClick={handleGetStarted}
         >
-          Get Started
+          Book Now
         </Button>
       </div>
 

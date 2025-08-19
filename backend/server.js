@@ -117,10 +117,10 @@ app.use((err, req, res, next) => {
   });
 });
 
-// 404 handler
-app.use('*', (req, res) => {
-  res.status(404).json({ error: 'Route not found' });
-});
+// 404 handler - commented out for debugging
+// app.use('/*', (req, res) => {
+//   res.status(404).json({ error: 'Route not found' });
+// });
 
 // Initialize and start server
 const startServer = async () => {

@@ -54,8 +54,8 @@ export const Hero = () => {
         </Badge>
 
         <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold mb-6 leading-tight drop-shadow-2xl">
-          Professional On-Site
-          <span className="block text-accent drop-shadow-2xl">Headshot Packages</span>
+          Professional Headshots
+          <span className="block text-accent drop-shadow-2xl">Zero Hassle</span>
         </h1>
 
         <p className="text-base sm:text-xl md:text-2xl mb-8 text-white/95 max-w-3xl mx-auto leading-relaxed drop-shadow-lg backdrop-blur-sm bg-black/20 px-4 py-2 rounded-lg">
